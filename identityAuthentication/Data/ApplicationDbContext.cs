@@ -31,7 +31,7 @@ namespace identityAuthentication.Data
                 entity.Property(e => e.IdEmpresa).HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(e => e.DataCriacao).HasDefaultValueSql("now()");
 
-                // Empresa -> Usuários
+                // Empresa -> Usuarios
                 entity.HasMany(e => e.ApplicationUsers)
                       .WithOne(u => u.Empresa)
                       .HasForeignKey(u => u.IdEmpresa)
@@ -41,7 +41,7 @@ namespace identityAuthentication.Data
                 entity.HasMany(e => e.Chamados)
                       .WithOne(c => c.Empresa)
                       .HasForeignKey(c => c.IdEmpresa)
-                      .OnDelete(DeleteBehavior.Restrict); // Não deixa excluir empresa com chamados
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // --- Setor ---
@@ -56,7 +56,7 @@ namespace identityAuthentication.Data
                       .HasForeignKey(s => s.IdEmpresa)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // Setor -> Usuários
+                // Setor -> Usuarios
                 entity.HasMany(s => s.ApplicationUsers)
                       .WithOne(u => u.Setor)
                       .HasForeignKey(u => u.IdSetor)
@@ -66,7 +66,7 @@ namespace identityAuthentication.Data
                 entity.HasMany(s => s.Chamados)
                       .WithOne(c => c.Setor)
                       .HasForeignKey(c => c.IdSetor)
-                      .OnDelete(DeleteBehavior.SetNull); // Se setor for excluído, chamado perde o vínculo
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             // --- Categoria ---
@@ -79,7 +79,7 @@ namespace identityAuthentication.Data
                 entity.HasMany(cat => cat.Chamados)
                       .WithOne(c => c.Categoria)
                       .HasForeignKey(c => c.IdCategoria)
-                      .OnDelete(DeleteBehavior.Restrict); // Não deixa excluir categoria com chamados
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // --- Prioridade ---
@@ -136,18 +136,16 @@ namespace identityAuthentication.Data
                 entity.Property(c => c.IdChamado).HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(c => c.DataAbertura).HasDefaultValueSql("now()");
 
-                // Relações N-1
                 entity.HasOne(c => c.Solicitante)
                       .WithMany(u => u.ChamadosSolicitados)
                       .HasForeignKey(c => c.IdSolicitante)
-                      .OnDelete(DeleteBehavior.Restrict); // Não deixa excluir usuário com chamados abertos
+                      .OnDelete(DeleteBehavior.Restrict); 
 
                 entity.HasOne(c => c.Atendente)
                       .WithMany(u => u.ChamadosAtendidos)
                       .HasForeignKey(c => c.IdAtendente)
-                      .OnDelete(DeleteBehavior.SetNull); // Se atendente for excluído, chamado perde o vínculo
+                      .OnDelete(DeleteBehavior.SetNull);
 
-                // Outras relações N-1 já configuradas nas entidades pai
             });
 
             // --- NOVO: ChamadoHistorico ---
@@ -156,19 +154,17 @@ namespace identityAuthentication.Data
                 entity.Property(h => h.IdHistorico).HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(h => h.DataComentario).HasDefaultValueSql("now()");
 
-                // Histórico -> Chamado
+                // Histï¿½rico -> Chamado
                 entity.HasOne(h => h.Chamado)
                       .WithMany(c => c.Historico)
                       .HasForeignKey(h => h.IdChamado)
-                      .OnDelete(DeleteBehavior.Cascade); // Se chamado for excluído, histórico vai junto
+                      .OnDelete(DeleteBehavior.Cascade);
 
-                // Histórico -> Usuário
+                // Histï¿½rico -> Usuario
                 entity.HasOne(h => h.Usuario)
                       .WithMany(u => u.Historicos)
                       .HasForeignKey(h => h.IdUsuario)
-                      .OnDelete(DeleteBehavior.Restrict); // Não deixa excluir usuário com histórico
-
-                // Relações com Status já configuradas em StatusChamado
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
