@@ -20,7 +20,7 @@
 
 <StatusMessage Message="@message" />
 <h1>Registrar</h1>
-<h2>Associe sua conta @ProviderDisplayName.</h2>
+<h2>Associe sua conta @ProviderDisplayName .</h2>
 <hr />
 
 <div  class="alert alert-info">
@@ -77,7 +77,7 @@
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Account/Login", "Erro ao carregar informações de login externo.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Erro ao carregar informações de login externo.", HttpContext);
         }
 
         externalLoginInfo = info;
