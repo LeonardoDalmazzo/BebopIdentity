@@ -1,0 +1,29 @@
+@page "/debug"
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Claims do usuário atual</h3>
+
+@if (user is null)
+{
+    <p>Carregando...</p>
+}
+else
+{
+    <ul>
+        @foreach (var claim in user.Claims)
+        {
+            <li><b>@claim.Type:</b> @claim.Value</li>
+        }
+    </ul>
+}
+
+@code {
+    private ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+    }
+}
