@@ -1,0 +1,144 @@
+@page "/status"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@inject ApplicationDbContext DbContext
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="status-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-check-double me-2"></i> Gerenciamento de Status
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando dados...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-3">
+            <h5><i class="fa-solid fa-list-check me-2"></i>Status Existentes</h5>
+
+            @if (!StatusLista.Any())
+            {
+                <p class="text-center text-muted mt-3">Nenhum status cadastrado ainda.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mt-2">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nome do Status</th>
+                                <th style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in StatusLista)
+                            {
+                                <tr>
+                                    <td>@item.NomeStatus</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm"
+                                                title="Excluir Status"
+                                                @onclick="() => DeleteItem(item)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <button class="btn btn-primary mt-3 w-100" @onclick="ToggleAddForm">
+                <i class="fa-solid @(showAddForm ? "fa-xmark" : "fa-plus") me-2"></i>
+                @(showAddForm ? "Cancelar" : "Adicionar Novo Status")
+            </button>
+
+            @if (showAddForm)
+            {
+                <div class="card mt-3 p-4 border border-secondary bg-light">
+                    <h5 class="mb-3 text-center">
+                        <i class="fa-solid fa-plus-circle me-2"></i>Adicionar Novo Status
+                    </h5>
+
+                    <EditForm Model="novoItem" OnValidSubmit="SubmitNewItem">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome do Status</label>
+                            <InputText class="form-control" @bind-Value="novoItem.NomeStatus" />
+                            <ValidationMessage For="() => novoItem.NomeStatus" />
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fa-solid fa-check me-1"></i>Salvar
+                            </button>
+                            <button type="button" class="btn btn-secondary px-4" @onclick="CancelForm">
+                                <i class="fa-solid fa-xmark me-1"></i>Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool showAddForm = false;
+    private List<StatusChamado> StatusLista = new();
+    private StatusChamado novoItem = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        StatusLista = await DbContext.StatusChamados
+            .OrderBy(s => s.NomeStatus)
+            .ToListAsync();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            novoItem = new();
+        }
+    }
+
+    private void CancelForm()
+    {
+        showAddForm = false;
+        novoItem = new();
+    }
+
+    private async Task SubmitNewItem()
+    {
+        DbContext.StatusChamados.Add(novoItem);
+        await DbContext.SaveChangesAsync();
+        await LoadData();
+        CancelForm();
+    }
+
+    private async Task DeleteItem(StatusChamado item)
+    {
+        var itemParaExcluir = await DbContext.StatusChamados.FindAsync(item.IdStatus);
+        if (itemParaExcluir is not null)
+        {
+            DbContext.StatusChamados.Remove(itemParaExcluir);
+            await DbContext.SaveChangesAsync();
+        }
+        await LoadData();
+    }
+}

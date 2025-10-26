@@ -5,56 +5,89 @@ namespace identityAuthentication.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        // DbSets existentes
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<Setor> Setores { get; set; }
+
+        // NOVOS DbSets
+        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Prioridade> Prioridades { get; set; }
+        public DbSet<StatusChamado> StatusChamados { get; set; }
+        public DbSet<FAQ> FAQs { get; set; }
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Adicionado para configurar o mapeamento da nova tabela
-        // OnModelCreating é onde configuramos as regras do banco de dados
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            // É essencial chamar base.OnModelCreating() PRIMEIRO 
-            // para que as tabelas do Identity sejam configuradas corretamente.
+            // Configuração do Identity (SEMPRE PRIMEIRO)
             base.OnModelCreating(builder);
 
             // --- Configuração da Entidade Empresa ---
+            // (Esta usa PascalCase, como você criou originalmente)
             builder.Entity<Empresa>(entity =>
             {
-                // Informa ao EF que a coluna IdEmpresa usa gen_random_uuid() no banco
                 entity.Property(e => e.IdEmpresa)
                     .HasDefaultValueSql("gen_random_uuid()");
-
-                // Informa ao EF que a coluna DataCriacao usa now() no banco
                 entity.Property(e => e.DataCriacao)
                     .HasDefaultValueSql("now()");
             });
 
             // --- Configuração da Entidade Setor ---
+            // (Esta usa PascalCase, como você criou originalmente)
             builder.Entity<Setor>(entity =>
             {
-                // Informa ao EF que o Supabase gera os valores padrão
                 entity.Property(s => s.IdSetor)
                     .HasDefaultValueSql("gen_random_uuid()");
-
                 entity.Property(s => s.DataCriacao)
                     .HasDefaultValueSql("now()");
 
-                // --- Definição da Relação (Chave Estrangeira) ---
-
-                // Aqui dizemos que:
-                // 1. Um Setor (s) TEM UMA Empresa (s.Empresa)
-                // 2. Uma Empresa (e) TEM MUITOS Setores (e.Setores)
-                // 3. A Chave Estrangeira está em Setor, na coluna IdEmpresa (s.IdEmpresa)
                 entity.HasOne(s => s.Empresa)
                       .WithMany(e => e.Setores)
                       .HasForeignKey(s => s.IdEmpresa)
-                      // Impede que você exclua uma Empresa se ela ainda tiver Setores ligados a ela.
-                      // Você teria que excluir os Setores primeiro.
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // --- NOVA: Configuração da Entidade Categoria ---
+            // (Esta usa lowercase, conforme os novos mapeamentos)
+            builder.Entity<Categoria>(entity =>
+            {
+                entity.Property(c => c.IdCategoria)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(c => c.DataCriacao)
+                    .HasDefaultValueSql("now()");
+            });
+
+            // --- NOVA: Configuração da Entidade Prioridade ---
+            builder.Entity<Prioridade>(entity =>
+            {
+                entity.Property(p => p.IdPrioridade)
+                    .HasDefaultValueSql("gen_random_uuid()");
+            });
+
+            // --- NOVA: Configuração da Entidade StatusChamado ---
+            builder.Entity<StatusChamado>(entity =>
+            {
+                entity.Property(s => s.IdStatus)
+                    .HasDefaultValueSql("gen_random_uuid()");
+            });
+
+            // --- NOVA: Configuração da Entidade FAQ ---
+            builder.Entity<FAQ>(entity =>
+            {
+                entity.Property(f => f.IdFAQ)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(f => f.DataCriacao)
+                    .HasDefaultValueSql("now()");
+
+                // Relação FAQ (N) -> Categoria (1)
+                entity.HasOne(f => f.Categoria)
+                      .WithMany(c => c.FAQs)
+                      .HasForeignKey(f => f.IdCategoria)
+                      .OnDelete(DeleteBehavior.Restrict); // Impede excluir Categoria com FAQs
             });
         }
     }

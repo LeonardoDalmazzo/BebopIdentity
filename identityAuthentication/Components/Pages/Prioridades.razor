@@ -1,0 +1,164 @@
+@page "/prioridades"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@inject ApplicationDbContext DbContext
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="prioridade-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> Gerenciamento de Prioridades
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando dados...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-3">
+            <h5><i class="fa-solid fa-list-check me-2"></i>Prioridades Existentes</h5>
+
+            @if (!PrioridadesLista.Any())
+            {
+                <p class="text-center text-muted mt-3">Nenhuma prioridade cadastrada ainda.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mt-2">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Nível (Urgência)</th>
+                                <th>Cor</th>
+                                <th style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in PrioridadesLista)
+                            {
+                                <tr>
+                                    <td>@item.NomePrioridade</td>
+                                    <td>@item.NivelUrgencia</td>
+                                    <td>
+                                        <span class="badge p-2" style="background-color: @item.CorHex; color: #333;">
+                                            @item.CorHex
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm"
+                                                title="Excluir Prioridade"
+                                                @onclick="() => DeleteItem(item)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <button class="btn btn-primary mt-3 w-100" @onclick="ToggleAddForm">
+                <i class="fa-solid @(showAddForm ? "fa-xmark" : "fa-plus") me-2"></i>
+                @(showAddForm ? "Cancelar" : "Adicionar Nova Prioridade")
+            </button>
+
+            @if (showAddForm)
+            {
+                <div class="card mt-3 p-4 border border-secondary bg-light">
+                    <h5 class="mb-3 text-center">
+                        <i class="fa-solid fa-plus-circle me-2"></i>Adicionar Nova Prioridade
+                    </h5>
+
+                    <EditForm Model="novoItem" OnValidSubmit="SubmitNewItem">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome da Prioridade</label>
+                                <InputText class="form-control" @bind-Value="novoItem.NomePrioridade" />
+                                <ValidationMessage For="() => novoItem.NomePrioridade" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nível de Urgência (Ex: 1)</label>
+                                <InputNumber class="form-control" @bind-Value="novoItem.NivelUrgencia" />
+                                <ValidationMessage For="() => novoItem.NivelUrgencia" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cor (Hex)</label>
+                            <InputText type="color" class="form-control form-control-color" @bind-Value="novoItem.CorHex" />
+                            <ValidationMessage For="() => novoItem.CorHex" />
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fa-solid fa-check me-1"></i>Salvar
+                            </button>
+                            <button type="button" class="btn btn-secondary px-4" @onclick="CancelForm">
+                                <i class="fa-solid fa-xmark me-1"></i>Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool showAddForm = false;
+    private List<Prioridade> PrioridadesLista = new();
+    private Prioridade novoItem = new() { CorHex = "#ffc107" }; // Padrão amarelo
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        PrioridadesLista = await DbContext.Prioridades
+            .OrderBy(p => p.NivelUrgencia)
+            .ToListAsync();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            novoItem = new() { CorHex = "#ffc107" };
+        }
+    }
+
+    private void CancelForm()
+    {
+        showAddForm = false;
+        novoItem = new() { CorHex = "#ffc107" };
+    }
+
+    private async Task SubmitNewItem()
+    {
+        DbContext.Prioridades.Add(novoItem);
+        await DbContext.SaveChangesAsync();
+        await LoadData();
+        CancelForm();
+    }
+
+    private async Task DeleteItem(Prioridade item)
+    {
+        var itemParaExcluir = await DbContext.Prioridades.FindAsync(item.IdPrioridade);
+        if (itemParaExcluir is not null)
+        {
+            DbContext.Prioridades.Remove(itemParaExcluir);
+            await DbContext.SaveChangesAsync();
+        }
+        await LoadData();
+    }
+}
