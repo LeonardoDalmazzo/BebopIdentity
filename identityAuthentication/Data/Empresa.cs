@@ -20,5 +20,7 @@ namespace identityAuthentication.Data
 
         [Column("DataCriacao")]
         public DateTime DataCriacao { get; set; }
+
+        public virtual ICollection<Setor> Setores { get; set; } = new List<Setor>();
     }
 }
