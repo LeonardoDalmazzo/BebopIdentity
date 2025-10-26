@@ -18,15 +18,24 @@
 .top-row {
     min-height: 3.5rem;
     background-color: rgba(0,0,0,0.4);
+    /* Garante que a logo fique alinhada */
+    display: flex;
+    align-items: center;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
 }
 
-/* REMOVIDO: Classes .bi e .bi-* foram removidas
-   pois agora estamos usando Font Awesome (<i class="">)
-*/
+/* NOVO: Estilo da Logo/Mascote */
+.nav-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 4px;
+}
 
 .nav-item {
     font-size: 0.9rem;
@@ -53,12 +62,14 @@
         width: 100%;
     }
 
-        /* NOVO: Ajuste para ícones do Font Awesome */
+        /* Ajuste para ícones do Font Awesome */
         .nav-item ::deep .nav-link i {
             width: 1.25rem;
             height: 1.25rem;
             line-height: 1.25rem; /* Garante alinhamento vertical */
             text-align: center; /* Centraliza o ícone */
+            /* Transição suave para mudança de cor */
+            transition: color 0.15s ease-in-out;
         }
 
 
@@ -71,6 +82,81 @@
         background-color: rgba(255,255,255,0.1);
         color: white;
     }
+
+/*
+ * =================================
+ * NOVOS ESTILOS: SUBMENU E SEÇÕES
+ * =================================
+ */
+
+/* Divisor visual (linha) */
+.nav-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+    margin: 0.5rem 1rem;
+}
+
+/* Cabeçalho da seção (ex: "PAINEL ADMIN") */
+.nav-section-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Botão que abre o submenu */
+.nav-submenu-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+    /* Seta do submenu */
+    .nav-submenu-toggle .fa-chevron-right {
+        font-size: 0.8rem;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    /* Rotação da seta quando o submenu está ativo/aberto */
+    .nav-submenu-toggle.active .fa-chevron-right {
+        transform: rotate(90deg);
+    }
+
+/* Container do Submenu (escondido por padrão) */
+.nav-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    /* Remove padding-bottom do .nav-item pai */
+    padding-bottom: 0;
+}
+
+    /* Container do Submenu (visível) */
+    .nav-submenu.show {
+        /* Altura máxima grande o suficiente para todos os itens */
+        max-height: 500px;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Itens dentro do submenu (indentados) */
+    .nav-submenu .nav-item {
+        padding-bottom: 0;
+    }
+
+    .nav-submenu ::deep .nav-link {
+        /* Indentação para mostrar hierarquia */
+        padding-left: 2.5rem;
+        height: 2.5rem;
+        line-height: 2.5rem;
+        font-size: 0.85rem;
+        color: #b0b0b0; /* Cor mais suave para sub-item */
+    }
+
+        /* Cor do sub-item ativo ou em hover */
+        .nav-submenu ::deep .nav-link:hover,
+        .nav-submenu ::deep .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
 
 .nav-scrollable {
     display: none;
