@@ -1,0 +1,193 @@
+@page "/cadastroempresa"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@inject ApplicationDbContext DbContext
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="empresa-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-building me-2"></i> Gerenciamento de Empresas
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando dados...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-3">
+            <h5><i class="fa-solid fa-list-check me-2"></i>Empresas Existentes</h5>
+
+            @if (!EmpresasLista.Any())
+            {
+                <p class="text-center text-muted mt-3">Nenhuma empresa cadastrada ainda.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mt-2">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nome da Empresa</th>
+                                <th>Ativo</th>
+                                <th>Data de Criação</th>
+                                <th style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var empresa in EmpresasLista)
+                            {
+                                <tr>
+                                    <td>@empresa.NomeEmpresa</td>
+                                    <td>
+                                        <span class="badge @(empresa.Ativo ? "bg-success" : "bg-danger")">
+                                            @(empresa.Ativo ? "Sim" : "Não")
+                                        </span>
+                                    </td>
+                                    <td>@empresa.DataCriacao.ToLocalTime().ToString("g")</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm"
+                                                title="Excluir Empresa"
+                                                @onclick="() => DeleteEmpresa(empresa)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <button class="btn btn-primary mt-3 w-100"
+                    @onclick="ToggleAddForm">
+                <i class="fa-solid @(showAddForm ? "fa-xmark" : "fa-plus") me-2"></i>
+                @(showAddForm ? "Cancelar" : "Adicionar Nova Empresa")
+            </button>
+
+            @if (showAddForm)
+            {
+                <div class="card mt-3 p-4 border border-secondary bg-light">
+                    <h5 class="mb-3 text-center">
+                        <i class="fa-solid fa-plus-circle me-2"></i>Adicionar Nova Empresa
+                    </h5>
+
+                    <EditForm Model="novaEmpresa" OnValidSubmit="SubmitNewEmpresa">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome da Empresa</label>
+                            <InputText class="form-control" @bind-Value="novaEmpresa.NomeEmpresa" />
+                            <ValidationMessage For="() => novaEmpresa.NomeEmpresa" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="novaEmpresa.Ativo" id="ativoCheck" />
+                            <label class="form-check-label" for="ativoCheck">Empresa Ativa</label>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fa-solid fa-check me-1"></i>Salvar
+                            </button>
+                            <button type="button" class="btn btn-secondary px-4" @onclick="CancelForm">
+                                <i class="fa-solid fa-xmark me-1"></i>Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool showAddForm = false;
+    private List<Empresa> EmpresasLista = new();
+    private Empresa novaEmpresa = new() { Ativo = true }; // Inicia o modelo do form com Ativo = true
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        // Carrega as empresas ordenadas por nome
+        EmpresasLista = await DbContext.Empresas
+            .OrderBy(e => e.NomeEmpresa)
+            .ToListAsync();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            // Reseta o formulário ao abrir
+            novaEmpresa = new() { Ativo = true };
+        }
+    }
+
+    private void CancelForm()
+    {
+        showAddForm = false;
+        novaEmpresa = new() { Ativo = true };
+    }
+
+    private async Task SubmitNewEmpresa()
+    {
+        // Validação extra para garantir que o nome não é apenas espaço
+        if (string.IsNullOrWhiteSpace(novaEmpresa.NomeEmpresa))
+        {
+            novaEmpresa.NomeEmpresa = string.Empty; // Força o DataAnnotationsValidator a rodar
+            return;
+        }
+
+        // Verifica se já existe uma empresa com o mesmo nome (ignorando maiúsculas/minúsculas)
+        var exists = await DbContext.Empresas
+            .AnyAsync(e => e.NomeEmpresa.ToUpper() == novaEmpresa.NomeEmpresa.Trim().ToUpper());
+
+        if (exists)
+        {
+            // Idealmente, você adicionaria uma mensagem de erro na tela
+            // Por enquanto, vamos apenas logar e parar
+            Console.WriteLine($"Erro: Empresa '{novaEmpresa.NomeEmpresa}' já existe.");
+            return; // Interrompe a submissão
+        }
+        
+        // Adiciona a nova empresa ao contexto.
+        // O DbContext está configurado para deixar o Banco (Supabase)
+        // gerar o IdEmpresa (uuid) e a DataCriacao (timestamp)
+        DbContext.Empresas.Add(novaEmpresa);
+        
+        // Salva as mudanças no banco
+        await DbContext.SaveChangesAsync();
+
+        // Reseta o formulário e recarrega a lista
+        await LoadData();
+        showAddForm = false;
+        novaEmpresa = new() { Ativo = true };
+    }
+
+    private async Task DeleteEmpresa(Empresa empresa)
+    {
+        // NOTA: Aqui você deve adicionar uma confirmação (JS confirm)
+        // para evitar exclusões acidentais.
+
+        var empresaParaExcluir = await DbContext.Empresas.FindAsync(empresa.IdEmpresa);
+        
+        if (empresaParaExcluir is not null)
+        {
+            DbContext.Empresas.Remove(empresaParaExcluir);
+            await DbContext.SaveChangesAsync();
+        }
+
+        // Recarrega os dados
+        await LoadData();
+    }
+}
