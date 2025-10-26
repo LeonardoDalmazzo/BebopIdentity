@@ -1,0 +1,26 @@
+.status-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+button i {
+    pointer-events: none;
+}
+
+.card .btn {
+    min-width: 100px;
+}
+
+.card .d-flex.justify-content-center button {
+    width: 130px;
+}
+
+@media (max-width: 768px) {
+    .status-wrapper {
+        padding: 0 10px;
+    }
+
+    .card {
+        padding: 1rem !important;
+    }
+}
