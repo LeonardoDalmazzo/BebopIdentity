@@ -1,0 +1,28 @@
+.empresa-wrapper {
+    max-width: 900px; /* Ajustado para um formulário/tabela mais simples */
+    margin: 0 auto;
+}
+
+button i {
+    pointer-events: none;
+}
+
+.card .btn {
+    min-width: 100px;
+}
+
+/* Centralizar botões do formulário */
+.card .d-flex.justify-content-center button {
+    width: 130px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .empresa-wrapper {
+        padding: 0 10px;
+    }
+
+    .card {
+        padding: 1rem !important;
+    }
+}
