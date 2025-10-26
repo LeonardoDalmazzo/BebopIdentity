@@ -1,10 +1,13 @@
 ﻿@implements IDisposable
-
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">identityAuthentication</a>
+        <a class="navbar-brand" href="">
+            <img src="images/Logo.png" class="nav-logo me-2" alt="Mascote" />
+            BehBop Tech Help
+        </a>
     </div>
 </div>
 
@@ -12,50 +15,105 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <i class="fa-solid fa-house me-2" aria-hidden="true"></i> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/roles" Match="NavLinkMatch.All">
-                <i class="fa-solid fa-user-shield me-2" aria-hidden="true"></i> Roles
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/cadastroempresa" Match="NavLinkMatch.All">
-                <i class="fa-solid fa-building me-2" aria-hidden="true"></i> Empresas
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/cadastrosetor" Match="NavLinkMatch.All">
-                <i class="fa-solid fa-sitemap me-2" aria-hidden="true"></i> Setores
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <i class="fa-solid fa-square-plus me-2" aria-hidden="true"></i> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <i class="fa-solid fa-cloud-sun me-2" aria-hidden="true"></i> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <i class="fa-solid fa-lock me-2" aria-hidden="true"></i> Auth Required
-            </NavLink>
-        </div>
 
         <AuthorizeView>
             <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <i class="fa-solid fa-house me-2" aria-hidden="true"></i> Home
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/novochamado">
+                        <i class="fa-solid fa-circle-plus me-2" aria-hidden="true"></i> Novo Chamado
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/tickets">
+                        <i class="fa-solid fa-ticket me-2" aria-hidden="true"></i> Tickets
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/faqs">
+                        <i class="fa-solid fa-circle-question me-2" aria-hidden="true"></i> FAQs
+                    </NavLink>
+                </div>
+                
+                <hr class="nav-divider" />
+
+                <AuthorizeView Roles="Admin" Context="adminContext">
+                    <Authorized>
+                        <div class="nav-section-header px-3">ADMIN OPTIONS</div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="/painel">
+                                <i class="fa-solid fa-chart-pie me-2" aria-hidden="true"></i> Painel
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="/estatisticas">
+                                <i class="fa-solid fa-chart-bar me-2" aria-hidden="true"></i> Estatísticas
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="/relatorios">
+                                <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Relatórios
+                            </NavLink>
+                        </div>
+                        
+                        <div class="nav-item px-3">
+                            <div class="nav-link nav-submenu-toggle @(showConfigSubmenu ? "active" : "")" @onclick="ToggleConfigSubmenu" role="button" tabindex="0">
+                                <i class="fa-solid fa-cogs me-2" aria-hidden="true"></i>
+                                Parâmetros
+                                <i class="fa-solid fa-chevron-right ms-auto" aria-hidden="true"></i>
+                            </div>
+                            
+                            <div class="nav-submenu @(showConfigSubmenu ? "show" : "")">
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/roles">
+                                        <i class="fa-solid fa-user-shield me-2" aria-hidden="true"></i> Roles
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/cadastroempresa">
+                                        <i class="fa-solid fa-building me-2" aria-hidden="true"></i> Empresas
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/cadastrosetor">
+                                        <i class="fa-solid fa-sitemap me-2" aria-hidden="true"></i> Setores
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/editarfaqs">
+                                        <i class="fa-solid fa-pen-to-square me-2" aria-hidden="true"></i> Editar FAQs
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/categorias">
+                                        <i class="fa-solid fa-tags me-2" aria-hidden="true"></i> Categorias
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/prioridades">
+                                        <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i> Prioridades
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item px-3">
+                                    <NavLink class="nav-link" href="/status">
+                                        <i class="fa-solid fa-check-double me-2" aria-hidden="true"></i> Status
+                                    </NavLink>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="nav-divider" />
+                    </Authorized>
+                </AuthorizeView>
+
+
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <i class="fa-solid fa-user-gear me-2" aria-hidden="true"></i> @context.User.Identity?.Name
@@ -71,6 +129,7 @@
                     </form>
                 </div>
             </Authorized>
+
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
@@ -89,11 +148,17 @@
 
 @code {
     private string? currentUrl;
+    private bool showConfigSubmenu = false; // Controla o submenu
 
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleConfigSubmenu()
+    {
+        showConfigSubmenu = !showConfigSubmenu;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
