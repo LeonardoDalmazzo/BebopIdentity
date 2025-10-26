@@ -1,0 +1,226 @@
+@page "/cadastrosetor"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@inject ApplicationDbContext DbContext
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="setor-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-sitemap me-2"></i> Gerenciamento de Setores
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando dados...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-3">
+            <h5><i class="fa-solid fa-list-check me-2"></i>Setores Existentes</h5>
+
+            @if (!SetoresLista.Any())
+            {
+                <p class="text-center text-muted mt-3">Nenhum setor cadastrado ainda.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mt-2">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nome do Setor</th>
+                                <th>Empresa (Pai)</th>
+                                <th>Ativo</th>
+                                <th>Data de Criação</th>
+                                <th style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var setor in SetoresLista)
+                            {
+                                <tr>
+                                    <td>@setor.NomeSetor</td>
+                                    <td>@setor.Empresa?.NomeEmpresa</td>
+                                    <td>
+                                        <span class="badge @(setor.Ativo ? "bg-success" : "bg-danger")">
+                                            @(setor.Ativo ? "Sim" : "Não")
+                                        </span>
+                                    </td>
+                                    <td>@setor.DataCriacao.ToLocalTime().ToString("g")</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-danger btn-sm"
+                                                title="Excluir Setor"
+                                                @onclick="() => DeleteSetor(setor)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <button class="btn btn-primary mt-3 w-100"
+                    @onclick="ToggleAddForm">
+                <i class="fa-solid @(showAddForm ? "fa-xmark" : "fa-plus") me-2"></i>
+                @(showAddForm ? "Cancelar" : "Adicionar Novo Setor")
+            </button>
+
+            @if (showAddForm)
+            {
+                <div class="card mt-3 p-4 border border-secondary bg-light">
+                    <h5 class="mb-3 text-center">
+                        <i class="fa-solid fa-plus-circle me-2"></i>Adicionar Novo Setor
+                    </h5>
+
+                    <EditForm Model="novoSetor" OnValidSubmit="SubmitNewSetor">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Empresa</label>
+                            <InputSelect class="form-select" @bind-Value="novoSetor.IdEmpresa">
+                                <option value="">-- Selecione uma empresa --</option>
+                                @foreach (var empresa in EmpresasLista)
+                                {
+                                    <option value="@empresa.IdEmpresa">@empresa.NomeEmpresa</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => novoSetor.IdEmpresa" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome do Setor</label>
+                            <InputText class="form-control" @bind-Value="novoSetor.NomeSetor" />
+                            <ValidationMessage For="() => novoSetor.NomeSetor" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="novoSetor.Ativo" id="ativoCheckSetor" />
+                            <label class="form-check-label" for="ativoCheckSetor">Setor Ativo</label>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fa-solid fa-check me-1"></i>Salvar
+                            </button>
+                            <button type="button" class="btn btn-secondary px-4" @onclick="CancelForm">
+                                <i class="fa-solid fa-xmark me-1"></i>Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool showAddForm = false;
+    
+    // Listas de dados
+    private List<Setor> SetoresLista = new();
+    private List<Empresa> EmpresasLista = new();
+    
+    // Modelo para o formulário
+    private SetorInputModel novoSetor = new() { Ativo = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        // Carrega a lista de empresas (apenas ativas) para o dropdown
+        EmpresasLista = await DbContext.Empresas
+            .Where(e => e.Ativo)
+            .OrderBy(e => e.NomeEmpresa)
+            .ToListAsync();
+
+        // Carrega os setores e inclui a informação da Empresa (like a JOIN)
+        SetoresLista = await DbContext.Setores
+            .Include(s => s.Empresa) // Traz os dados da Empresa relacionada
+            .OrderBy(s => s.NomeSetor)
+            .ToListAsync();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            ResetForm();
+        }
+    }
+
+    private void CancelForm()
+    {
+        showAddForm = false;
+        ResetForm();
+    }
+    
+    private void ResetForm()
+    {
+        // Reseta o formulário
+        novoSetor = new() { Ativo = true };
+    }
+
+    private async Task SubmitNewSetor()
+    {
+        // Converte o InputModel para o Modelo de Dados (Data Model)
+        var setorParaSalvar = new Setor
+        {
+            NomeSetor = novoSetor.NomeSetor.Trim(),
+            IdEmpresa = novoSetor.IdEmpresa,
+            Ativo = novoSetor.Ativo
+            // IdSetor e DataCriacao serão gerados pelo Supabase (conforme DbContext)
+        };
+
+        // Adiciona ao contexto
+        DbContext.Setores.Add(setorParaSalvar);
+        
+        // Salva as mudanças no banco
+        await DbContext.SaveChangesAsync();
+
+        // Reseta o formulário e recarrega a lista
+        await LoadData();
+        showAddForm = false;
+        ResetForm();
+    }
+
+    private async Task DeleteSetor(Setor setor)
+    {
+        var setorParaExcluir = await DbContext.Setores.FindAsync(setor.IdSetor);
+        
+        if (setorParaExcluir is not null)
+        {
+            DbContext.Setores.Remove(setorParaExcluir);
+            await DbContext.SaveChangesAsync();
+        }
+
+        await LoadData();
+    }
+    
+    /// <summary>
+    /// Modelo de "Input" para o formulário.
+    /// Usar um ViewModel/InputModel separado é uma boa prática (Clean Code)
+    /// para desacoplar a UI do modelo de dados.
+    /// </summary>
+    public class SetorInputModel
+    {
+        [Required(ErrorMessage = "O nome do setor é obrigatório.")]
+        [StringLength(100)]
+        public string NomeSetor { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "É obrigatório selecionar uma empresa.")]
+        public Guid IdEmpresa { get; set; }
+
+        public bool Ativo { get; set; } = true;
+    }
+}
