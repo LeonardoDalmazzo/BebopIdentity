@@ -1,0 +1,184 @@
+@page "/novochamado"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using System.ComponentModel.DataAnnotations
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+@attribute [Authorize]
+
+<PageTitle>Novo Chamado</PageTitle>
+
+<div class="novochamado-wrapper container py-4">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-circle-plus me-2"></i> Abrir Novo Chamado
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando...</em></p>
+    }
+    else if (!userHasCompany)
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            Você precisa estar vinculado a uma empresa para abrir um chamado.
+            Por favor, entre em contato com o administrador do sistema.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm p-4">
+            <EditForm Model="novoChamado" OnValidSubmit="HandleValidSubmit" FormName="NovoChamadoForm">
+                <DataAnnotationsValidator />
+
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Categoria</label>
+                        <InputSelect class="form-select" @bind-Value="novoChamado.IdCategoria">
+                            <option value="">-- Selecione --</option>
+                            @foreach (var cat in CategoriasLista)
+                            {
+                                <option value="@cat.IdCategoria">@cat.NomeCategoria</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => novoChamado.IdCategoria" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Prioridade</label>
+                        <InputSelect class="form-select" @bind-Value="novoChamado.IdPrioridade">
+                            <option value="">-- Selecione --</option>
+                            @foreach (var prio in PrioridadesLista)
+                            {
+                                <option value="@prio.IdPrioridade">@prio.NomePrioridade</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => novoChamado.IdPrioridade" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Título</label>
+                    <InputText class="form-control" @bind-Value="novoChamado.Titulo" />
+                    <ValidationMessage For="() => novoChamado.Titulo" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Descrição do Problema/Solicitação</label>
+                    <InputTextArea class="form-control" rows="5" @bind-Value="novoChamado.Descricao" />
+                    <ValidationMessage For="() => novoChamado.Descricao" />
+                </div>
+
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Enviando...</span>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-paper-plane me-2"></i>
+                            <span>Enviar Chamado</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool userHasCompany = false;
+    private string? currentUserId;
+    private Guid? currentUserEmpresaId;
+    private Guid? currentUserSetorId;
+    private Guid? statusAbertoId;
+
+    private List<Categoria> CategoriasLista = new();
+    private List<Prioridade> PrioridadesLista = new();
+
+    private ChamadoInputModel novoChamado = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var appUser = await DbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            if (appUser != null && appUser.IdEmpresa != null)
+            {
+                userHasCompany = true;
+                currentUserEmpresaId = appUser.IdEmpresa;
+                currentUserSetorId = appUser.IdSetor;
+
+                CategoriasLista = await DbContext.Categorias.Where(c => c.Ativo).OrderBy(c => c.NomeCategoria).ToListAsync();
+                PrioridadesLista = await DbContext.Prioridades.OrderBy(p => p.NivelUrgencia).ToListAsync();
+
+                var statusAberto = await DbContext.StatusChamados.FirstOrDefaultAsync(s => s.NomeStatus == "Aberto");
+                statusAbertoId = statusAberto?.IdStatus;
+            }
+        }
+        isLoading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (currentUserId == null || currentUserEmpresaId == null || statusAbertoId == null)
+        {
+            Console.WriteLine("Erro: Dados do usuário ou status 'Aberto' não encontrados.");
+            return;
+        }
+
+        isSubmitting = true;
+
+        var chamado = new Chamado
+        {
+            Titulo = novoChamado.Titulo,
+            Descricao = novoChamado.Descricao,
+            IdCategoria = novoChamado.IdCategoria,
+            IdPrioridade = novoChamado.IdPrioridade,
+            IdSolicitante = currentUserId,
+            IdEmpresa = currentUserEmpresaId.Value,
+            IdSetor = currentUserSetorId,
+            IdStatus = statusAbertoId.Value,
+            DataAbertura = DateTime.UtcNow
+        };
+
+        DbContext.Chamados.Add(chamado);
+        await DbContext.SaveChangesAsync();
+
+        isSubmitting = false;
+        NavigationManager.NavigateTo("/tickets");
+    }
+
+    public class ChamadoInputModel
+    {
+        [Required(ErrorMessage = "Selecione uma categoria.")]
+        public Guid IdCategoria { get; set; }
+
+        [Required(ErrorMessage = "Selecione uma prioridade.")]
+        public Guid IdPrioridade { get; set; }
+
+        [Required(ErrorMessage = "O título é obrigatório.")]
+        [StringLength(200, ErrorMessage = "O título pode ter no máximo 200 caracteres.")]
+        public string Titulo { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "A descrição é obrigatória.")]
+        public string Descricao { get; set; } = string.Empty;
+    }
+}

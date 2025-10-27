@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic; // Necessário para ICollection
 
 namespace identityAuthentication.Data
 {
@@ -21,10 +22,10 @@ namespace identityAuthentication.Data
         [Column("DataCriacao")]
         public DateTime DataCriacao { get; set; }
 
-        // Relação existente
         public virtual ICollection<Setor> Setores { get; set; } = new List<Setor>();
-
-        // NOVA Relação: Uma empresa pode ter muitos usuários
         public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
+
+        // NOVA Relação: Uma empresa pode ter muitos chamados
+        public virtual ICollection<Chamado> Chamados { get; set; } = new List<Chamado>();
     }
 }

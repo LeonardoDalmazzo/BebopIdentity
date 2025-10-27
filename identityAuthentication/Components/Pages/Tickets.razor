@@ -1,0 +1,127 @@
+@page "/tickets"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@attribute [Authorize]
+
+<PageTitle>Meus Tickets</PageTitle>
+
+<div class="tickets-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-ticket me-2"></i>
+        @(isAdmin ? "Todos os Tickets" : "Meus Tickets")
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando tickets...</em></p>
+    }
+    else if (!ChamadosLista.Any())
+    {
+        <p class="text-center text-muted mt-4">Nenhum ticket encontrado.</p>
+        @if (!isAdmin)
+        {
+            <div class="text-center mt-3">
+                <a href="/novochamado" class="btn btn-primary">
+                    <i class="fa-solid fa-circle-plus me-1"></i> Abrir Primeiro Chamado
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="table-responsive card shadow-sm p-3">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#ID</th>
+                        <th>Título</th>
+                        <th>Categoria</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th>Aberto Em</th>
+                        @if (isAdmin)
+                        {
+                            <th>Solicitante</th>
+                            <th>Empresa</th>
+                        }
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var chamado in ChamadosLista)
+                    {
+                        <tr>
+                            <td>@chamado.IdChamado.ToString().Substring(0, 8)...</td>
+                            <td>@chamado.Titulo</td>
+                            <td>@chamado.Categoria?.NomeCategoria</td>
+                            <td>
+                                <span class="badge" style="background-color: @(chamado.Prioridade?.CorHex ?? "#6c757d"); color: #fff;">
+                                    @chamado.Prioridade?.NomePrioridade
+                                </span>
+                            </td>
+                            <td>@chamado.Status?.NomeStatus</td>
+                            <td>@chamado.DataAbertura.ToLocalTime().ToString("g")</td>
+                            @if (isAdmin)
+                            {
+                                <td>@chamado.Solicitante?.UserName</td>
+                                <td>@chamado.Empresa?.NomeEmpresa</td>
+                            }
+                            <td>
+                                <!-- TODO: Botão para ver detalhes -->
+                                <button class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <!-- TODO: Adicionar Paginação -->
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private bool isAdmin = false;
+    private string? currentUserId;
+    private List<Chamado> ChamadosLista = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            isAdmin = user.IsInRole("Admin"); // Verifica se é Admin
+
+            IQueryable<Chamado> query = DbContext.Chamados
+                .Include(c => c.Categoria)
+                .Include(c => c.Prioridade)
+                .Include(c => c.Status)
+                .Include(c => c.Solicitante) // Inclui para pegar o UserName
+                .Include(c => c.Empresa) // Inclui para pegar o NomeEmpresa
+                .OrderByDescending(c => c.DataAbertura);
+
+            if (isAdmin)
+            {
+                // Admin vê todos
+                ChamadosLista = await query.ToListAsync();
+            }
+            else if (currentUserId != null)
+            {
+                // Usuário vê apenas os seus
+                ChamadosLista = await query.Where(c => c.IdSolicitante == currentUserId).ToListAsync();
+            }
+        }
+        isLoading = false;
+    }
+}

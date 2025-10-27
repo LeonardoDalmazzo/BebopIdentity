@@ -1,30 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic; // Necessário para ICollection
 
 namespace identityAuthentication.Data
 {
-    [Table("categorias")] // <-- Corrigido
+    [Table("categorias")]
     public class Categoria
     {
         [Key]
-        [Column("idcategoria")] // <-- Corrigido
+        [Column("idcategoria")]
         public Guid IdCategoria { get; set; }
 
         [Required(ErrorMessage = "O nome da categoria é obrigatório.")]
         [StringLength(100)]
-        [Column("nomecategoria")] // <-- Corrigido
+        [Column("nomecategoria")]
         public string NomeCategoria { get; set; } = string.Empty;
 
-        [Column("descricao")] // <-- Corrigido
+        [Column("descricao")]
         public string? Descricao { get; set; }
 
-        [Column("ativo")] // <-- Corrigido
+        [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
-        [Column("datacriacao")] // <-- Corrigido
+        [Column("datacriacao")]
         public DateTime DataCriacao { get; set; }
 
-        // Propriedade de navegação: Uma Categoria pode ter muitas FAQs
         public virtual ICollection<FAQ> FAQs { get; set; } = new List<FAQ>();
+
+        // NOVA Relação: Uma categoria pode ter muitos chamados
+        public virtual ICollection<Chamado> Chamados { get; set; } = new List<Chamado>();
     }
 }

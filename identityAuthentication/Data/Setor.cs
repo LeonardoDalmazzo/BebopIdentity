@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic; // Necessário para ICollection
 
 namespace identityAuthentication.Data
 {
@@ -21,7 +22,6 @@ namespace identityAuthentication.Data
         [Column("DataCriacao")]
         public DateTime DataCriacao { get; set; }
 
-        // --- Chave Estrangeira ---
         [Required(ErrorMessage = "É obrigatório selecionar uma empresa.")]
         [Column("IdEmpresa")]
         public Guid IdEmpresa { get; set; }
@@ -29,7 +29,9 @@ namespace identityAuthentication.Data
         [ForeignKey("IdEmpresa")]
         public virtual Empresa? Empresa { get; set; }
 
-        // NOVA Relação: Um setor pode ter muitos usuários
         public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
+
+        // NOVA Relação: Um setor pode ter muitos chamados
+        public virtual ICollection<Chamado> Chamados { get; set; } = new List<Chamado>();
     }
 }

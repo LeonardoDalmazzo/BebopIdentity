@@ -1,0 +1,14 @@
+.tickets-wrapper {
+    max-width: 1400px; /* Tabela pode ser larga */
+    margin: 0 auto;
+}
+
+.table th, .table td {
+    white-space: nowrap; /* Impede que o texto quebre linha */
+}
+
+    .table td .badge {
+        min-width: 80px; /* Garante tamanho mínimo para badges */
+        display: inline-block;
+        text-align: center;
+    }
