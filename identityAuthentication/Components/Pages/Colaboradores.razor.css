@@ -1,0 +1,9 @@
+.colaboradores-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Garante que os dropdowns não sejam muito largos */
+.table td .form-select {
+    min-width: 200px;
+}

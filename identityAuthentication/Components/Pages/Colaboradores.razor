@@ -1,0 +1,174 @@
+@page "/colaboradores"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="colaboradores-wrapper container-fluid py-3">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-users-cog me-2"></i> Gestão de Colaboradores
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando dados...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-3">
+            <h5><i class="fa-solid fa-users me-2"></i>Usuários e Vínculos</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Empresa</th>
+                            <th>Setor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in UsersList)
+                        {
+                            <tr>
+                                <td>@user.UserName</td>
+                                <td>@user.Email</td>
+                                
+                                <td>
+                                    <select class="form-select form-select-sm"
+                                            @onchange="(e) => OnEmpresaChanged(user, e.Value?.ToString())">
+                                        <option value="" selected="@(user.IdEmpresa == null)">-- Nenhuma --</option>
+                                        @foreach (var empresa in EmpresasLista)
+                                        {
+                                            <option value="@empresa.IdEmpresa" selected="@(user.IdEmpresa == empresa.IdEmpresa)">
+                                                @empresa.NomeEmpresa
+                                            </option>
+                                        }
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select class="form-select form-select-sm"
+                                            @onchange="(e) => OnSetorChanged(user, e.Value?.ToString())"
+                                            disabled="@(user.IdEmpresa == null)">
+                                        <option value="" selected="@(user.IdSetor == null)">-- Nenhum --</option>
+                                        
+                                        @foreach (var setor in GetSetoresParaEmpresa(user.IdEmpresa))
+                                        {
+                                            <option value="@setor.IdSetor" selected="@(user.IdSetor == setor.IdSetor)">
+                                                @setor.NomeSetor
+                                            </option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    
+    // Listas de dados
+    private List<UserViewModel> UsersList = new();
+    private List<Empresa> EmpresasLista = new();
+    private List<Setor> SetoresLista = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        isLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        // Carrega os catálogos
+        EmpresasLista = await DbContext.Empresas.OrderBy(e => e.NomeEmpresa).ToListAsync();
+        SetoresLista = await DbContext.Setores.OrderBy(s => s.NomeSetor).ToListAsync();
+
+        // Carrega os usuários
+        var users = await UserManager.Users
+            .OrderBy(u => u.UserName)
+            .ToListAsync();
+        
+        UsersList.Clear();
+        foreach (var user in users)
+        {
+            UsersList.Add(new UserViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName!,
+                Email = user.Email!,
+                IdEmpresa = user.IdEmpresa,
+                IdSetor = user.IdSetor
+            });
+        }
+    }
+
+    // Filtra a lista de setores com base na empresa selecionada
+    private IEnumerable<Setor> GetSetoresParaEmpresa(Guid? idEmpresa)
+    {
+        if (idEmpresa == null)
+        {
+            return Enumerable.Empty<Setor>();
+        }
+        return SetoresLista.Where(s => s.IdEmpresa == idEmpresa);
+    }
+
+    // Chamado ao mudar a Empresa
+    private async Task OnEmpresaChanged(UserViewModel user, string? empresaIdStr)
+    {
+        var appUser = await UserManager.FindByIdAsync(user.Id);
+        if (appUser == null) return;
+
+        Guid.TryParse(empresaIdStr, out var empresaId);
+        
+        // Atualiza a Empresa
+        appUser.IdEmpresa = (empresaId == Guid.Empty) ? null : empresaId;
+        
+        // REGRA: Se a empresa muda, o setor é resetado
+        appUser.IdSetor = null; 
+
+        await UserManager.UpdateAsync(appUser);
+        
+        // Atualiza o ViewModel local para a UI refletir a mudança
+        user.IdEmpresa = appUser.IdEmpresa;
+        user.IdSetor = appUser.IdSetor;
+        StateHasChanged();
+    }
+
+    // Chamado ao mudar o Setor
+    private async Task OnSetorChanged(UserViewModel user, string? setorIdStr)
+    {
+        var appUser = await UserManager.FindByIdAsync(user.Id);
+        if (appUser == null) return;
+
+        Guid.TryParse(setorIdStr, out var setorId);
+
+        appUser.IdSetor = (setorId == Guid.Empty) ? null : setorId;
+
+        await UserManager.UpdateAsync(appUser);
+        
+        // Atualiza o ViewModel local
+        user.IdSetor = appUser.IdSetor;
+        StateHasChanged();
+    }
+
+    // ViewModel (POO) para a tabela
+    public class UserViewModel
+    {
+        public string Id { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public Guid? IdEmpresa { get; set; }
+        public Guid? IdSetor { get; set; }
+    }
+}

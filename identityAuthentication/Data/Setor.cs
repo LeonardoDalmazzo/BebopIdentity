@@ -22,14 +22,14 @@ namespace identityAuthentication.Data
         public DateTime DataCriacao { get; set; }
 
         // --- Chave Estrangeira ---
-
         [Required(ErrorMessage = "É obrigatório selecionar uma empresa.")]
         [Column("IdEmpresa")]
         public Guid IdEmpresa { get; set; }
 
-        // Propriedade de navegação para a relação N-1
-        // Um Setor pertence a uma Empresa
         [ForeignKey("IdEmpresa")]
         public virtual Empresa? Empresa { get; set; }
+
+        // NOVA Relação: Um setor pode ter muitos usuários
+        public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
     }
 }

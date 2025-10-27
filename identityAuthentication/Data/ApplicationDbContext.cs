@@ -9,7 +9,7 @@ namespace identityAuthentication.Data
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<Setor> Setores { get; set; }
 
-        // NOVOS DbSets
+        // DbSets dos Parâmetros
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Prioridade> Prioridades { get; set; }
         public DbSet<StatusChamado> StatusChamados { get; set; }
@@ -27,17 +27,21 @@ namespace identityAuthentication.Data
             base.OnModelCreating(builder);
 
             // --- Configuração da Entidade Empresa ---
-            // (Esta usa PascalCase, como você criou originalmente)
             builder.Entity<Empresa>(entity =>
             {
                 entity.Property(e => e.IdEmpresa)
                     .HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(e => e.DataCriacao)
                     .HasDefaultValueSql("now()");
+
+                // NOVA Relação: Empresa -> Usuários
+                entity.HasMany(e => e.ApplicationUsers)
+                      .WithOne(u => u.Empresa)
+                      .HasForeignKey(u => u.IdEmpresa)
+                      .OnDelete(DeleteBehavior.SetNull); // Conforme SQL
             });
 
             // --- Configuração da Entidade Setor ---
-            // (Esta usa PascalCase, como você criou originalmente)
             builder.Entity<Setor>(entity =>
             {
                 entity.Property(s => s.IdSetor)
@@ -45,14 +49,20 @@ namespace identityAuthentication.Data
                 entity.Property(s => s.DataCriacao)
                     .HasDefaultValueSql("now()");
 
+                // Relação existente: Setor -> Empresa
                 entity.HasOne(s => s.Empresa)
                       .WithMany(e => e.Setores)
                       .HasForeignKey(s => s.IdEmpresa)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                // NOVA Relação: Setor -> Usuários
+                entity.HasMany(s => s.ApplicationUsers)
+                      .WithOne(u => u.Setor)
+                      .HasForeignKey(u => u.IdSetor)
+                      .OnDelete(DeleteBehavior.SetNull); // Conforme SQL
             });
 
-            // --- NOVA: Configuração da Entidade Categoria ---
-            // (Esta usa lowercase, conforme os novos mapeamentos)
+            // --- Configuração da Entidade Categoria ---
             builder.Entity<Categoria>(entity =>
             {
                 entity.Property(c => c.IdCategoria)
@@ -61,21 +71,21 @@ namespace identityAuthentication.Data
                     .HasDefaultValueSql("now()");
             });
 
-            // --- NOVA: Configuração da Entidade Prioridade ---
+            // --- Configuração da Entidade Prioridade ---
             builder.Entity<Prioridade>(entity =>
             {
                 entity.Property(p => p.IdPrioridade)
                     .HasDefaultValueSql("gen_random_uuid()");
             });
 
-            // --- NOVA: Configuração da Entidade StatusChamado ---
+            // --- Configuração da Entidade StatusChamado ---
             builder.Entity<StatusChamado>(entity =>
             {
                 entity.Property(s => s.IdStatus)
                     .HasDefaultValueSql("gen_random_uuid()");
             });
 
-            // --- NOVA: Configuração da Entidade FAQ ---
+            // --- Configuração da Entidade FAQ ---
             builder.Entity<FAQ>(entity =>
             {
                 entity.Property(f => f.IdFAQ)
@@ -83,11 +93,10 @@ namespace identityAuthentication.Data
                 entity.Property(f => f.DataCriacao)
                     .HasDefaultValueSql("now()");
 
-                // Relação FAQ (N) -> Categoria (1)
                 entity.HasOne(f => f.Categoria)
                       .WithMany(c => c.FAQs)
                       .HasForeignKey(f => f.IdCategoria)
-                      .OnDelete(DeleteBehavior.Restrict); // Impede excluir Categoria com FAQs
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

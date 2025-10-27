@@ -21,6 +21,10 @@ namespace identityAuthentication.Data
         [Column("DataCriacao")]
         public DateTime DataCriacao { get; set; }
 
+        // Relação existente
         public virtual ICollection<Setor> Setores { get; set; } = new List<Setor>();
+
+        // NOVA Relação: Uma empresa pode ter muitos usuários
+        public virtual ICollection<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
     }
 }
