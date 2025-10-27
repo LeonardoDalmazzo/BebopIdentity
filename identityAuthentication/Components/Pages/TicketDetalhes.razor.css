@@ -1,0 +1,25 @@
+.ticket-detalhes-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+p[style*="white-space: pre-wrap;"],
+.list-group-item p[style*="white-space: pre-wrap;"] {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.list-group-item {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+    .list-group-item .form-label {
+        margin-bottom: 0.25rem;
+    }
+
+.history-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
