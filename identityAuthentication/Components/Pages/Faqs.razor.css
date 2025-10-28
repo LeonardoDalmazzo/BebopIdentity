@@ -1,0 +1,33 @@
+.faqs-viewer-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Estilo para cada item da FAQ (agora um card) */
+.faq-item-simple {
+    background-color: #fff; /* Fundo branco */
+}
+
+/* Estilo para a pergunta */
+.faq-question-simple {
+    color: #0d6efd; /* Azul primário */
+    margin-bottom: 0.5rem; /* Espaço antes da linha */
+    font-size: 1.1rem; /* Tamanho um pouco maior */
+}
+
+/* Estilo para a resposta */
+.faq-answer-simple {
+    color: #495057;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+    /* Garante que o conteúdo HTML na resposta não quebre o layout */
+    .faq-answer-simple p:last-child {
+        margin-bottom: 0;
+    }
+
+/* Estilo para a informação da categoria no final */
+.faq-item-simple small.text-muted {
+    font-size: 0.8rem;
+}

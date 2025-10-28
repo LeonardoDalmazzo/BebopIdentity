@@ -1,0 +1,105 @@
+@page "/faqs"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+
+<PageTitle>FAQs - Perguntas Frequentes</PageTitle>
+
+<div class="faqs-viewer-wrapper container py-4">
+    <h3 class="text-center mb-4">
+        <i class="fa-solid fa-circle-question me-2"></i> Perguntas Frequentes (FAQs)
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-center"><em>Carregando FAQs...</em></p>
+    }
+    else if (!allFaqs.Any())
+    {
+        <p class="text-center text-muted mt-4">Nenhuma FAQ encontrada.</p>
+    }
+    else
+    {
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <label for="categoryFilter" class="form-label">Filtrar por Categoria:</label>
+                <select id="categoryFilter" class="form-select" @onchange="HandleCategoryFilterChange">
+                    <option value="@Guid.Empty">-- Todas as Categorias --</option>
+                    @foreach (var category in categoriesWithFaqs)
+                    {
+                        <option value="@category.IdCategoria">@category.NomeCategoria</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="faq-list mt-4">
+             @if (!GetFilteredFaqs().Any())
+             {
+                 <p class="text-center text-muted mt-3">Nenhuma FAQ encontrada para a categoria selecionada.</p>
+             }
+             else
+             {
+                @foreach (var faq in GetFilteredFaqs())
+                {
+                    <div class="faq-item-simple card card-body mb-3 shadow-sm">
+                        <h5 class="faq-question-simple">@faq.Pergunta</h5>
+                        <hr class="my-2">
+                        <div class="faq-answer-simple">
+                             @((MarkupString)faq.Resposta) @* Renderiza HTML se houver *@
+                        </div>
+                         <small class="text-muted mt-2">Categoria: @faq.Categoria?.NomeCategoria</small>
+                    </div>
+                }
+             }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private List<Categoria> categoriesWithFaqs = new();
+    private List<FAQ> allFaqs = new();
+    private Guid selectedCategoryId = Guid.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFaqs();
+        isLoading = false;
+    }
+
+    private async Task LoadFaqs()
+    {
+        allFaqs = await DbContext.FAQs
+            .Include(f => f.Categoria)
+            .Where(f => f.Ativo && f.Categoria != null && f.Categoria.Ativo)
+            .OrderBy(f => f.Categoria!.NomeCategoria)
+            .ThenBy(f => f.Pergunta)
+            .ToListAsync();
+
+        categoriesWithFaqs = allFaqs
+            .Select(f => f.Categoria!)
+            .DistinctBy(c => c.IdCategoria)
+            .OrderBy(c => c.NomeCategoria)
+            .ToList();
+    }
+
+    private void HandleCategoryFilterChange(ChangeEventArgs e)
+    {
+        Guid.TryParse(e.Value?.ToString(), out selectedCategoryId);
+        StateHasChanged();
+    }
+
+    private List<FAQ> GetFilteredFaqs()
+    {
+        if (selectedCategoryId == Guid.Empty)
+        {
+            return allFaqs;
+        }
+        else
+        {
+            return allFaqs.Where(f => f.IdCategoria == selectedCategoryId).ToList();
+        }
+    }
+}

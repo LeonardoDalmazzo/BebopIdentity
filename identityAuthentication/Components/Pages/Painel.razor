@@ -1,0 +1,199 @@
+@page "/painel"
+@rendermode InteractiveServer
+@using identityAuthentication.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@attribute [Authorize(Roles = "Admin, SuporteTI")] // Autorização para ambas as roles
+
+<PageTitle>Painel de Controle</PageTitle>
+
+<div class="painel-wrapper container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h3 class="mb-0 text-primary fw-bold">
+            <i class="fa-solid fa-chart-pie me-2"></i> Painel de Controle Global
+        </h3>
+        <div class="d-flex align-items-center">
+             <label for="periodFilter" class="form-label me-2 mb-0 fw-semibold text-muted small">Período:</label>
+             <select id="periodFilter" class="form-select form-select-sm" style="width: auto;" @onchange="HandlePeriodChange">
+                <option value="all">Desde Sempre</option>
+                <option value="today">Hoje</option>
+                <option value="lastWeek" disabled>Última Semana (Em desenvolvimento)</option>
+                <option value="byMonth" disabled>Filtrar por Mês (Em desenvolvimento)</option>
+            </select>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+             <p class="mt-2 text-muted"><em>Carregando dados do painel...</em></p>
+        </div>
+    }
+    else
+    {
+        <h5 class="mb-3 text-muted fw-light">Visão Geral por Status</h5>
+        <div class="row g-3 mb-4">
+            @foreach (var statusCount in statusCounts)
+            {
+                 <div class="col-lg-3 col-md-6">
+                    <div class="card shadow-sm h-100 card-painel @GetStatusCardClass(statusCount.Key.NomeStatus)">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fs-1 fw-bolder">@statusCount.Value</div>
+                                    <div class="fs-6 text-white text-opacity-75">@statusCount.Key.NomeStatus</div>
+                                </div>
+                                <i class="@GetStatusIconClass(statusCount.Key.NomeStatus) fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                         </div>
+                </div>
+            }
+             <div class="col-lg-3 col-md-6">
+                 <div class="card text-white bg-secondary shadow-sm h-100 card-painel">
+                     <div class="card-body">
+                         <div class="d-flex justify-content-between align-items-start">
+                             <div>
+                                <div class="fs-1 fw-bolder">@countSemAtendente</div>
+                                <div class="fs-6 text-white text-opacity-75">Aguardando Atendente</div>
+                             </div>
+                             <i class="fa-solid fa-user-clock fa-3x opacity-50"></i>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <h5 class="mb-3 text-muted fw-light">Visão Geral por Categoria</h5>
+         <div class="row g-3">
+             @foreach (var categoryCount in categoryCounts)
+            {
+                 <div class="col-lg-3 col-md-6">
+                    <div class="card bg-light border-start border-primary border-4 shadow-sm h-100 card-painel-category">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                 <div class="text-primary fw-bold text-uppercase small">@categoryCount.Key.NomeCategoria</div>
+                                <div class="fs-2 fw-bolder text-dark">@categoryCount.Value</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-5">
+             </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private string selectedPeriod = "all";
+
+    // IDs de Status
+    private Guid? statusAbertoId;
+
+    // Listas e Dicionários para Contagens
+    private List<StatusChamado> allStatuses = new();
+    private List<Categoria> allCategories = new();
+    private Dictionary<StatusChamado, int> statusCounts = new();
+    private Dictionary<Categoria, int> categoryCounts = new();
+    private int countSemAtendente = 0; // Contagem separada
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Carrega Status e Categorias uma vez
+        allStatuses = await DbContext.StatusChamados.AsNoTracking().OrderBy(s => s.NomeStatus).ToListAsync();
+        allCategories = await DbContext.Categorias.AsNoTracking().OrderBy(c => c.NomeCategoria).ToListAsync();
+
+        statusAbertoId = allStatuses.FirstOrDefault(s => s.NomeStatus == "Aberto")?.IdStatus;
+
+        await LoadDataAsync(); // Carrega dados iniciais
+    }
+
+    private async Task HandlePeriodChange(ChangeEventArgs e)
+    {
+        selectedPeriod = e.Value?.ToString() ?? "all";
+        isLoading = true;
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        // 1. Calcula Datas do Filtro (Simplificado)
+        DateTime now = DateTime.UtcNow;
+        DateTime startDate = DateTime.MinValue;
+        DateTime endDate = now.AddDays(1).Date; // Inclui até o fim de hoje
+
+        switch (selectedPeriod)
+        {
+            case "today":
+                startDate = now.Date;
+                break;
+             // case "all": já é o padrão
+             // Outros casos (lastWeek, byMonth) estão desabilitados no select
+        }
+
+        // 2. Cria a Query Base (Global - sem filtro de usuário)
+        IQueryable<Chamado> baseQuery = DbContext.Chamados.AsNoTracking();
+
+        // 3. Aplica Filtro de Período (se não for "all")
+        IQueryable<Chamado> filteredQuery = baseQuery;
+        if (selectedPeriod != "all")
+        {
+            filteredQuery = baseQuery.Where(c => c.DataAbertura >= startDate && c.DataAbertura < endDate);
+        }
+
+        // 4. Calcula Contagens Dinâmicas por Status
+        statusCounts.Clear(); // Limpa contagens anteriores
+        foreach (var status in allStatuses)
+        {
+            statusCounts[status] = await filteredQuery.CountAsync(c => c.IdStatus == status.IdStatus);
+        }
+
+         // 5. Calcula Contagens Dinâmicas por Categoria
+        categoryCounts.Clear(); // Limpa contagens anteriores
+         foreach (var category in allCategories)
+        {
+            categoryCounts[category] = await filteredQuery.CountAsync(c => c.IdCategoria == category.IdCategoria);
+        }
+
+        // 6. Calcula Contagem "Sem Atendente" (baseado no status "Aberto")
+        if (statusAbertoId.HasValue)
+        {
+            countSemAtendente = await filteredQuery.CountAsync(c => c.IdStatus == statusAbertoId.Value && c.IdAtendente == null);
+        } else {
+             countSemAtendente = 0;
+        }
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    // Helper para definir a cor do card de status
+    private string GetStatusCardClass(string statusName) => statusName switch
+    {
+        "Aberto" => "bg-danger",
+        "Em Andamento" => "bg-warning text-dark", // Texto escuro para melhor contraste
+        "Resolvido" => "bg-success",
+        "Fechado" => "bg-dark",
+        _ => "bg-secondary" // Padrão
+    };
+
+     // Helper para definir o ícone do card de status
+     private string GetStatusIconClass(string statusName) => statusName switch
+    {
+        "Aberto" => "fa-solid fa-envelope-open-text",
+        "Em Andamento" => "fa-solid fa-person-digging",
+        "Resolvido" => "fa-solid fa-check-circle",
+        "Fechado" => "fa-solid fa-archive",
+        _ => "fa-solid fa-question-circle" // Padrão
+    };
+}
