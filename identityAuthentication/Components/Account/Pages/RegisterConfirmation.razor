@@ -25,7 +25,7 @@
 }
 else
 {
-    <p role="alert">Please check your email to confirm your account.</p>
+    <p role="alert">Por favor, verifique seu email para confirmar sua conta.</p>
 }
 
 @code {
@@ -52,7 +52,7 @@ else
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = "Error finding user for unspecified email";
+            statusMessage = "Erro ao encontrar usuário para email não especificado";
         }
         else if (EmailSender is IdentityNoOpEmailSender)
         {
