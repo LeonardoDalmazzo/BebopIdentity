@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Routing
                 var user = await userManager.GetUserAsync(context.User);
                 if (user is null)
                 {
-                    return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
+                    return Results.NotFound($"Não foi possível carregar o usuário com ID '{userManager.GetUserId(context.User)}'.");
                 }
 
                 var userId = await userManager.GetUserIdAsync(user);
@@ -97,10 +97,10 @@ namespace Microsoft.AspNetCore.Routing
                 var logins = await userManager.GetLoginsAsync(user);
                 foreach (var l in logins)
                 {
-                    personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
+                    personalData.Add($"Chave do provedor de login externo {l.LoginProvider}", l.ProviderKey);
                 }
 
-                personalData.Add("Authenticator Key", (await userManager.GetAuthenticatorKeyAsync(user))!);
+                personalData.Add("Chave do Autenticador", (await userManager.GetAuthenticatorKeyAsync(user))!);
                 var fileBytes = JsonSerializer.SerializeToUtf8Bytes(personalData);
 
                 context.Response.Headers.TryAdd("Content-Disposition", "attachment; filename=PersonalData.json");
