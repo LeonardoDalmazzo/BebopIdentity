@@ -10,12 +10,12 @@ namespace identityAuthentication.Components.Account
         private readonly IEmailSender emailSender = new NoOpEmailSender();
 
         public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink) =>
-            emailSender.SendEmailAsync(email, "Confirm your email", $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.");
+            emailSender.SendEmailAsync(email, "Confirme seu email", $"Por favor, confirme sua conta <a href='{confirmationLink}'>clicando aqui</a>.");
 
         public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink) =>
-            emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password by <a href='{resetLink}'>clicking here</a>.");
+            emailSender.SendEmailAsync(email, "Redefina sua senha", $"Por favor, redefina sua senha <a href='{resetLink}'>clicando aqui</a>.");
 
         public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode) =>
-            emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password using the following code: {resetCode}");
+            emailSender.SendEmailAsync(email, "Redefina sua senha", $"Por favor, redefina sua senha usando o seguinte código: {resetCode}");
     }
 }
