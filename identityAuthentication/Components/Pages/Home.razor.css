@@ -1,3 +1,4 @@
+/* --- Estilos Originais --- */
 .home-logo {
     width: 120px;
     height: 120px;
@@ -16,4 +17,95 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
+    }
+
+/* --- Novos Estilos do Chatbot (Adicionados) --- */
+.chat-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    height: 60vh; /* Altura do chat */
+    min-height: 400px; /* Altura minima */
+    max-height: 500px; /* Altura maxima */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chat-header {
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center; /* Alinha o logo e o texto */
+}
+    .chat-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .chat-header span {
+        font-size: 0.8rem;
+        color: #666;
+        margin-left: auto; /* Joga o "Assistente Virtual" para a direita */
+    }
+
+/* Novo estilo para o logo no header do chat */
+.chat-logo {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto; /* Scroll */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.message {
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    max-width: 85%;
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+
+.message.assistente {
+    background-color: #e9ecef;
+    color: #212529;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+.message.usuario {
+    background-color: #0d6efd; /* Azul do Bootstrap Primary */
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 0 0 8px 8px;
+}
+
+    .chat-input-area input {
+        flex-grow: 1;
+        border-radius: 20px 0 0 20px;
+    }
+
+    .chat-input-area button {
+        border-radius: 0 20px 20px 0;
+        border-left: 0;
     }
