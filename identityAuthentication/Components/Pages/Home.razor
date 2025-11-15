@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Authorization
+@using identityAuthentication.Services
+@inject OllamaChatService ChatService
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
@@ -30,6 +33,45 @@
             <p class="fs-5 text-muted mb-4 text-center">
                 O que você gostaria de fazer?
             </p>
+
+            <div class="row g-4 mb-4 justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    <div class="chat-wrapper">
+                        <div class="chat-header">
+                            <h5>
+                                <img src="images/Logo.png" class="chat-logo" alt="Logo" /> 
+                                Assistente Ed IV
+                            </h5>
+                            <span>Assistente Virtual</span>
+                        </div>
+                        <div class="chat-messages" id="chat-container">
+                            @foreach (var msg in _mensagens)
+                            {
+                                <div class="message @msg.CssClass">
+                                    @msg.Texto
+                                </div>
+                            }
+                            @if (_processando)
+                            {
+                                <div class="message assistente">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Digitando...
+                                </div>
+                            }
+                        </div>
+                        <div class="chat-input-area">
+                            <input @bind="_perguntaAtual" 
+                                   @onkeydown="HandleEnter" 
+                                   placeholder="Pergunte sobre o sistema..." 
+                                   class="form-control" 
+                                   disabled="@_processando" />
+                            <button @onclick="EnviarPergunta" class="btn btn-primary" disabled="@_processando">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="row g-3">
                 <div class="col-lg-4 col-md-6">
@@ -100,7 +142,74 @@
                     </div>
                 </Authorized>
             </AuthorizeView>
-
         </div>
     </Authorized>
 </AuthorizeView>
+
+@code {
+    // Classe interna para representar uma mensagem no chat
+    private class MensagemChat
+    {
+        public string Texto { get; set; } = string.Empty;
+        public bool EnviadoPorUsuario { get; set; }
+        public string CssClass => EnviadoPorUsuario ? "usuario" : "assistente";
+    }
+
+    private List<MensagemChat> _mensagens = new();
+    private string _perguntaAtual = string.Empty;
+    private bool _processando = false;
+
+    protected override void OnInitialized()
+    {
+        // Mensagem inicial do bot
+        _mensagens.Add(new MensagemChat 
+        { 
+            Texto = "Olá! Como posso ajudar você a usar o sistema de chamados hoje?", 
+            EnviadoPorUsuario = false 
+        });
+    }
+
+    private async Task HandleEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await EnviarPergunta();
+        }
+    }
+
+    private async Task EnviarPergunta()
+    {
+        if (string.IsNullOrWhiteSpace(_perguntaAtual) || _processando)
+            return;
+
+        var pergunta = _perguntaAtual;
+        _perguntaAtual = string.Empty; // Limpa o input
+
+        // 1. Adiciona a mensagem do usuário à tela
+        _mensagens.Add(new MensagemChat { Texto = pergunta, EnviadoPorUsuario = true });
+        
+        // 2. Ativa o "Digitando..."
+        _processando = true;
+        StateHasChanged(); // Atualiza a UI
+
+        try
+        {
+            // 3. Chama o serviço de IA
+            string resposta = await ChatService.GerarRespostaSimplesAsync(pergunta);
+
+            // 4. Adiciona a resposta do bot à tela
+            _mensagens.Add(new MensagemChat { Texto = resposta, EnviadoPorUsuario = false });
+        }
+        catch (Exception ex)
+        {
+            // 5. Mostra um erro se falhar
+            _mensagens.Add(new MensagemChat { Texto = $"Erro ao contatar a IA: {ex.Message}", EnviadoPorUsuario = false });
+        }
+        finally
+        {
+            // 6. Desativa o "Digitando..."
+            _processando = false;
+            StateHasChanged(); // Atualiza a UI
+        }
+    }
+}

@@ -1,6 +1,7 @@
 ﻿using identityAuthentication.Components;
 using identityAuthentication.Components.Account;
 using identityAuthentication.Data;
+using identityAuthentication.Services; // 1. Adicionar o using para o novo serviço
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+// ==========================================
+// 🤖 2. Configuração do Cliente HTTP para IA (Ollama)
+// ==========================================
+builder.Services.AddHttpClient("Ollama", client =>
+{
+    // O endereço padrão do Ollama
+    client.BaseAddress = new Uri("http://localhost:11434"); 
+});
+
+// 3. Registrar o novo serviço de Chat
+builder.Services.AddScoped<OllamaChatService>();
+// ==========================================
+
 
 // 🔸 Essa linha garante que as roles sejam adicionadas nas claims do cookie de autenticação
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>>();
