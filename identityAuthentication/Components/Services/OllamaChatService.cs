@@ -4,18 +4,10 @@ using System.Text.Json.Serialization;
 namespace identityAuthentication.Services
 {
     // --- Modelos para a Resposta do Ollama ---
-<<<<<<< HEAD
-    // Usado para desserializar a resposta da API /api/generate
-    public class OllamaGenerateResponse
-    {
-        [JsonPropertyName("response")]
-        public string Response { get; set; }
-=======
     public class OllamaGenerateResponse
     {
         [JsonPropertyName("response")]
         public string Response { get; set; } = string.Empty; // Corrigido: Inicializado
->>>>>>> ed070864079c026c837022f92495c82cfbdede99
 
         [JsonPropertyName("done")]
         public bool Done { get; set; }
@@ -25,18 +17,6 @@ namespace identityAuthentication.Services
     public class OllamaGenerateRequest
     {
         [JsonPropertyName("model")]
-<<<<<<< HEAD
-        public string Model { get; set; }
-
-        [JsonPropertyName("prompt")]
-        public string Prompt { get; set; }
-
-        [JsonPropertyName("system")]
-        public string System { get; set; } // O prompt do sistema
-
-        [JsonPropertyName("stream")]
-        public bool Stream { get; set; } = false; // Queremos a resposta de uma vez (sem stream)
-=======
         public string Model { get; set; } = string.Empty; // Corrigido: Inicializado
 
         [JsonPropertyName("prompt")]
@@ -47,7 +27,6 @@ namespace identityAuthentication.Services
 
         [JsonPropertyName("stream")]
         public bool Stream { get; set; } = false;
->>>>>>> ed070864079c026c837022f92495c82cfbdede99
     }
 
 
@@ -58,11 +37,7 @@ namespace identityAuthentication.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<OllamaChatService> _logger;
-<<<<<<< HEAD
-        private const string _ollamaModel = "llama3"; // Modelo que baixamos no Passo 1
-=======
         private const string _ollamaModel = "llama3"; // Modelo que baixamos
->>>>>>> ed070864079c026c837022f92495c82cfbdede99
 
         // O "System Prompt" define a personalidade e as regras do seu bot.
         private const string _systemPrompt = @"

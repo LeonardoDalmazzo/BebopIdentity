@@ -1,0 +1,16 @@
+{
+  "name": "BeBop Tech Help",
+  "short_name": "TechHelp",
+  "description": "Sistema de Chamados de Suporte Técnico",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "images/Logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
