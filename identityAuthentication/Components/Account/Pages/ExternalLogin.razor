@@ -16,17 +16,17 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Registrar</PageTitle>
 
 <StatusMessage Message="@message" />
-<h1>Register</h1>
-<h2>Associate your @ProviderDisplayName account.</h2>
+<h1>Registrar</h1>
+<h2>Associe sua conta @ProviderDisplayName.</h2>
 <hr />
 
 <div  class="alert alert-info">
-    You've successfully authenticated with <strong>@ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
+    Você foi autenticado com sucesso com <strong>@ProviderDisplayName</strong>.
+    Por favor, insira um endereço de email para este site abaixo e clique no botão Registrar para finalizar
+    o login.
 </div>
 
 <div class="row">
@@ -35,11 +35,11 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email." />
+                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" placeholder="Por favor, digite seu email." />
                 <label for="Input.Email" class="form-label">Email</label>
                 <ValidationMessage For="() => Input.Email" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
         </EditForm>
     </div>
 </div>
@@ -71,13 +71,13 @@
     {
         if (RemoteError is not null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", $"Erro do provedor externo: {RemoteError}", HttpContext);
         }
 
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Account/Login", "Erro ao carregar informações de login externo.", HttpContext);
         }
 
         externalLoginInfo = info;
@@ -100,7 +100,7 @@
     {
         if (externalLoginInfo is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Erro ao carregar informações de login externo.", HttpContext);
         }
 
         // Sign in the user with this external login provider if the user already has a login.
@@ -134,7 +134,7 @@
     {
         if (externalLoginInfo is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Erro ao carregar informações de login externo durante a confirmação.", HttpContext);
         }
 
         var emailStore = GetEmailStore();
@@ -191,7 +191,7 @@
     {
         if (!UserManager.SupportsUserEmail)
         {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
+            throw new NotSupportedException("A UI padrão requer um repositório de usuário com suporte a email.");
         }
         return (IUserEmailStore<ApplicationUser>)UserStore;
     }
