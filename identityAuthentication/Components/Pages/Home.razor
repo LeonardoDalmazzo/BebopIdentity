@@ -147,7 +147,6 @@
 </AuthorizeView>
 
 @code {
-    // Classe interna para representar uma mensagem no chat
     private class MensagemChat
     {
         public string Texto { get; set; } = string.Empty;
@@ -161,7 +160,6 @@
 
     protected override void OnInitialized()
     {
-        // Mensagem inicial do bot
         _mensagens.Add(new MensagemChat 
         { 
             Texto = "Olá! Como posso ajudar você a usar o sistema de chamados hoje?", 
@@ -183,33 +181,26 @@
             return;
 
         var pergunta = _perguntaAtual;
-        _perguntaAtual = string.Empty; // Limpa o input
-
-        // 1. Adiciona a mensagem do usuário à tela
+        _perguntaAtual = string.Empty;
         _mensagens.Add(new MensagemChat { Texto = pergunta, EnviadoPorUsuario = true });
         
-        // 2. Ativa o "Digitando..."
         _processando = true;
-        StateHasChanged(); // Atualiza a UI
+        StateHasChanged();
 
         try
         {
-            // 3. Chama o serviço de IA
             string resposta = await ChatService.GerarRespostaSimplesAsync(pergunta);
 
-            // 4. Adiciona a resposta do bot à tela
             _mensagens.Add(new MensagemChat { Texto = resposta, EnviadoPorUsuario = false });
         }
         catch (Exception ex)
         {
-            // 5. Mostra um erro se falhar
             _mensagens.Add(new MensagemChat { Texto = $"Erro ao contatar a IA: {ex.Message}", EnviadoPorUsuario = false });
         }
         finally
         {
-            // 6. Desativa o "Digitando..."
             _processando = false;
-            StateHasChanged(); // Atualiza a UI
+            StateHasChanged();
         }
     }
 }

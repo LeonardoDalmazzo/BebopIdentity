@@ -31,9 +31,9 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>Nome</th>
-                                <th>Descrição</th>
+                                <th>DescriÃ§Ã£o</th>
                                 <th>Ativo</th>
-                                <th style="width: 100px;">Ações</th>
+                                <th style="width: 100px;">AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,7 +44,7 @@
                                     <td>@item.Descricao</td>
                                     <td>
                                         <span class="badge @(item.Ativo ? "bg-success" : "bg-danger")">
-                                            @(item.Ativo ? "Sim" : "Não")
+                                            @(item.Ativo ? "Sim" : "NÃ£o")
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -83,7 +83,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Descrição (Opcional)</label>
+                            <label class="form-label fw-bold">DescriÃ§Ã£o (Opcional)</label>
                             <InputTextArea class="form-control" @bind-Value="novoItem.Descricao" />
                         </div>
 
@@ -151,7 +151,6 @@
 
     private async Task DeleteItem(Categoria item)
     {
-        // TODO: Adicionar verificação se a categoria está em uso por FAQs
         var itemParaExcluir = await DbContext.Categorias.FindAsync(item.IdCategoria);
         if (itemParaExcluir is not null)
         {

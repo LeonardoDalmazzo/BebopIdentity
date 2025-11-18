@@ -60,7 +60,7 @@
     {
         if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
         {
-            message = "Error: Incorrect password.";
+            message = "Erro: Senha incorreta.";
             return;
         }
 

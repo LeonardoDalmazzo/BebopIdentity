@@ -3,11 +3,10 @@
     margin: 0 auto;
 }
 
-/* Estilo Cards de Status */
 .card-painel {
     border: none;
     border-radius: 0.5rem;
-    color: white; /* Default para cards coloridos */
+    color: white;
     overflow: hidden;
     position: relative;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -29,11 +28,10 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 3.5rem;
-            opacity: 0.2; /* Mais sutil */
+            opacity: 0.2;
             z-index: 0;
         }
 
-    /* Força texto branco onde necessário */
     .card-painel .text-white {
         color: white !important;
     }
@@ -42,29 +40,26 @@
         opacity: 0.75;
     }
 
-    /* Texto escuro para cards claros (ex: Amarelo Warning) */
     .card-painel.bg-warning .fs-6 {
-        color: #333 !important; /* Cor mais escura */
+        color: #333 !important;
         opacity: 0.7;
     }
 
     .card-painel.bg-warning .fs-1 {
-        color: #333 !important; /* Cor mais escura */
+        color: #333 !important;
     }
 
 
-/* Estilo Cards de Categoria */
 .card-painel-category {
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border-radius: 0.375rem; /* Bordas padrão */
+    border-radius: 0.375rem;
 }
 
     .card-painel-category:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Sombra mais sutil */
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     }
 
-/* Ajustes Responsivos */
 @media (max-width: 992px) {
     .card-painel .card-body .fs-1 {
         font-size: 2.5rem;
@@ -96,7 +91,6 @@
         font-size: 1.5rem;
     }
 
-    /* Ajuste layout do filtro */
     .d-flex.align-items-center {
         justify-content: center;
         width: 100%;
@@ -110,5 +104,4 @@
             flex-grow: 1;
             max-width: 250px;
         }
-    /* Limita largura do select */
 }

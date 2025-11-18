@@ -3,7 +3,7 @@
 @using identityAuthentication.Data
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Authorization
-@using System.ComponentModel.DataAnnotations @* <--- Necessário para o InputModel *@
+@using System.ComponentModel.DataAnnotations @* <--- Necessï¿½rio para o InputModel *@
 @inject ApplicationDbContext DbContext
 @attribute [Authorize(Roles = "Admin")]
 
@@ -34,7 +34,7 @@
                                 <th>Pergunta</th>
                                 <th>Categoria</th>
                                 <th>Ativo</th>
-                                <th style="width: 100px;">Ações</th>
+                                <th style="width: 100px;">AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,7 +45,7 @@
                                     <td>@faq.Categoria?.NomeCategoria</td>
                                     <td>
                                         <span class="badge @(faq.Ativo ? "bg-success" : "bg-danger")">
-                                            @(faq.Ativo ? "Sim" : "Não")
+                                            @(faq.Ativo ? "Sim" : "NÃ£o")
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -138,13 +138,11 @@
 
     private async Task LoadData()
     {
-        // Carrega categorias ativas para o dropdown
         CategoriasLista = await DbContext.Categorias
             .Where(c => c.Ativo)
             .OrderBy(c => c.NomeCategoria)
             .ToListAsync();
 
-        // Carrega FAQs existentes, incluindo a Categoria
         FaqsLista = await DbContext.FAQs
             .Include(f => f.Categoria) 
             .OrderBy(f => f.Pergunta)
@@ -199,16 +197,15 @@
         await LoadData();
     }
     
-    // Modelo de Input (Clean Code) para o formulário
     public class FaqInputModel
     {
-        [Required(ErrorMessage = "A pergunta é obrigatória.")]
+        [Required(ErrorMessage = "A pergunta Ã© obrigatÃ³ria.")]
         public string Pergunta { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A resposta é obrigatória.")]
+        [Required(ErrorMessage = "A resposta Ã© obrigatÃ³ria.")]
         public string Resposta { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "É obrigatório selecionar uma categoria.")]
+        [Required(ErrorMessage = "Ã‰ obrigatÃ³rio selecionar uma categoria.")]
         public Guid IdCategoria { get; set; }
 
         public bool Ativo { get; set; } = true;

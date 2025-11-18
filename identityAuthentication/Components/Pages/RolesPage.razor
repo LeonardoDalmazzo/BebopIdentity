@@ -21,7 +21,6 @@
     else
     {
         <div class="roles-grid">
-            <!-- ==================== USUÁRIOS ==================== -->
             <div class="card shadow-sm p-3">
                 <h5><i class="fa-solid fa-users me-2"></i>Usuários e seus Cargos</h5>
                 <div class="table-responsive">
@@ -195,7 +194,6 @@
         if (string.IsNullOrWhiteSpace(newRole.Name))
             return;
 
-        // 🔒 Garante que todos os campos essenciais estão preenchidos
         if (string.IsNullOrWhiteSpace(newRole.Id))
         {
             var normalized = newRole.Name.Trim().ToUpperInvariant();

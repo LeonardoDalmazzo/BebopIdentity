@@ -1,5 +1,5 @@
 .empresa-wrapper {
-    max-width: 900px; /* Ajustado para um formulário/tabela mais simples */
+    max-width: 900px;
     margin: 0 auto;
 }
 
@@ -11,12 +11,10 @@ button i {
     min-width: 100px;
 }
 
-/* Centralizar botões do formulário */
 .card .d-flex.justify-content-center button {
     width: 130px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
     .empresa-wrapper {
         padding: 0 10px;

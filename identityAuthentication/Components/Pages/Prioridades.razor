@@ -31,9 +31,9 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>Nome</th>
-                                <th>Nível (Urgência)</th>
+                                <th>NÃ­vel (UrgÃªncia)</th>
                                 <th>Cor</th>
-                                <th style="width: 100px;">Ações</th>
+                                <th style="width: 100px;">AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -83,7 +83,7 @@
                                 <ValidationMessage For="() => novoItem.NomePrioridade" />
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nível de Urgência (Ex: 1)</label>
+                                <label class="form-label fw-bold">NÃ­vel de UrgÃªncia (Ex: 1)</label>
                                 <InputNumber class="form-control" @bind-Value="novoItem.NivelUrgencia" />
                                 <ValidationMessage For="() => novoItem.NivelUrgencia" />
                             </div>
@@ -113,7 +113,7 @@
     private bool isLoading = true;
     private bool showAddForm = false;
     private List<Prioridade> PrioridadesLista = new();
-    private Prioridade novoItem = new() { CorHex = "#ffc107" }; // Padrão amarelo
+    private Prioridade novoItem = new() { CorHex = "#ffc107" };
 
     protected override async Task OnInitializedAsync()
     {

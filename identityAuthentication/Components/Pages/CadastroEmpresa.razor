@@ -32,8 +32,8 @@
                             <tr>
                                 <th>Nome da Empresa</th>
                                 <th>Ativo</th>
-                                <th>Data de Criação</th>
-                                <th style="width: 100px;">Ações</th>
+                                <th>Data de CriaÃ§Ã£o</th>
+                                <th style="width: 100px;">AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -43,7 +43,7 @@
                                     <td>@empresa.NomeEmpresa</td>
                                     <td>
                                         <span class="badge @(empresa.Ativo ? "bg-success" : "bg-danger")">
-                                            @(empresa.Ativo ? "Sim" : "Não")
+                                            @(empresa.Ativo ? "Sim" : "NÃ£o")
                                         </span>
                                     </td>
                                     <td>@empresa.DataCriacao.ToLocalTime().ToString("g")</td>
@@ -107,7 +107,7 @@
     private bool isLoading = true;
     private bool showAddForm = false;
     private List<Empresa> EmpresasLista = new();
-    private Empresa novaEmpresa = new() { Ativo = true }; // Inicia o modelo do form com Ativo = true
+    private Empresa novaEmpresa = new() { Ativo = true };
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,7 +117,6 @@
 
     private async Task LoadData()
     {
-        // Carrega as empresas ordenadas por nome
         EmpresasLista = await DbContext.Empresas
             .OrderBy(e => e.NomeEmpresa)
             .ToListAsync();
@@ -128,7 +127,6 @@
         showAddForm = !showAddForm;
         if (showAddForm)
         {
-            // Reseta o formulário ao abrir
             novaEmpresa = new() { Ativo = true };
         }
     }
@@ -141,34 +139,25 @@
 
     private async Task SubmitNewEmpresa()
     {
-        // Validação extra para garantir que o nome não é apenas espaço
         if (string.IsNullOrWhiteSpace(novaEmpresa.NomeEmpresa))
         {
-            novaEmpresa.NomeEmpresa = string.Empty; // Força o DataAnnotationsValidator a rodar
+            novaEmpresa.NomeEmpresa = string.Empty;
             return;
         }
 
-        // Verifica se já existe uma empresa com o mesmo nome (ignorando maiúsculas/minúsculas)
         var exists = await DbContext.Empresas
             .AnyAsync(e => e.NomeEmpresa.ToUpper() == novaEmpresa.NomeEmpresa.Trim().ToUpper());
 
         if (exists)
         {
-            // Idealmente, você adicionaria uma mensagem de erro na tela
-            // Por enquanto, vamos apenas logar e parar
-            Console.WriteLine($"Erro: Empresa '{novaEmpresa.NomeEmpresa}' já existe.");
-            return; // Interrompe a submissão
+            Console.WriteLine($"Erro: Empresa '{novaEmpresa.NomeEmpresa}' jï¿½ existe.");
+            return;
         }
         
-        // Adiciona a nova empresa ao contexto.
-        // O DbContext está configurado para deixar o Banco (Supabase)
-        // gerar o IdEmpresa (uuid) e a DataCriacao (timestamp)
         DbContext.Empresas.Add(novaEmpresa);
         
-        // Salva as mudanças no banco
         await DbContext.SaveChangesAsync();
 
-        // Reseta o formulário e recarrega a lista
         await LoadData();
         showAddForm = false;
         novaEmpresa = new() { Ativo = true };
@@ -176,8 +165,6 @@
 
     private async Task DeleteEmpresa(Empresa empresa)
     {
-        // NOTA: Aqui você deve adicionar uma confirmação (JS confirm)
-        // para evitar exclusões acidentais.
 
         var empresaParaExcluir = await DbContext.Empresas.FindAsync(empresa.IdEmpresa);
         
@@ -187,7 +174,6 @@
             await DbContext.SaveChangesAsync();
         }
 
-        // Recarrega os dados
         await LoadData();
     }
 }

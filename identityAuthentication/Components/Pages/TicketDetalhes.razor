@@ -24,7 +24,7 @@
     else if (chamado == null)
     {
         <div class="alert alert-danger text-center" role="alert">
-            Ticket não encontrado ou você não tem permissão para visualizá-lo.
+            Ticket nÃ£o encontrado ou vocÃª nÃ£o tem permissÃ£o para visualizÃ¡-lo.
         </div>
     }
     else
@@ -46,20 +46,19 @@
                     <div class="card-body">
                         <h4 class="card-title">@chamado.Titulo</h4>
                         <hr/>
-                        <p><strong>Descrição:</strong></p>
+                        <p><strong>DescriÃ§Ã£o:</strong></p>
                         <p style="white-space: pre-wrap;">@chamado.Descricao</p>
                     </div>
                 </div>
 
-                <!-- Histórico / Comentários -->
                 <div class="card shadow-sm">
                      <div class="card-header bg-light fw-bold">
-                        Histórico e Comentários
+                        HistÃ³rico e ComentÃ¡rios
                     </div>
                     <div class="card-body">
                         @if (!chamado.Historico.Any())
                         {
-                            <p class="text-muted text-center">Nenhum comentário ainda.</p>
+                            <p class="text-muted text-center">Nenhum comentÃ¡rio ainda.</p>
                         }
                         else
                         {
@@ -84,12 +83,11 @@
                         }
 
                         <hr/>
-                        <h5 class="mt-4">Adicionar Comentário</h5>
-                        <!-- Formulário de Comentário -->
+                        <h5 class="mt-4">Adicionar ComentÃ¡rio</h5>
                         <EditForm Model="novoComentario" OnValidSubmit="HandleCommentSubmit" FormName="CommentForm">
                             <DataAnnotationsValidator />
                             <div class="mb-3">
-                                <InputTextArea class="form-control" rows="4" @bind-Value="novoComentario.Comentario" placeholder="Digite seu comentário ou atualização aqui..." />
+                                <InputTextArea class="form-control" rows="4" @bind-Value="novoComentario.Comentario" placeholder="Digite seu comentÃ¡rio ou atualizaÃ§Ã£o aqui..." />
                                 <ValidationMessage For="() => novoComentario.Comentario" />
                             </div>
                             <button type="submit" class="btn btn-success w-100" disabled="@isSubmittingComment">
@@ -101,7 +99,7 @@
                                 else
                                 {
                                      <i class="fa-solid fa-paper-plane me-1"></i>
-                                     <span>Enviar Comentário</span>
+                                     <span>Enviar ComentÃ¡rio</span>
                                 }
                             </button>
                         </EditForm>
@@ -109,11 +107,10 @@
                 </div>
             </div>
 
-            <!-- Coluna Direita: Informações e Ações -->
             <div class="col-lg-5">
                 <div class="card shadow-sm">
                      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
-                        Informações
+                        InformaÃ§Ãµes
                         <AuthorizeView Roles="Admin, SuporteTI">
                              @if (!isEditing)
                              {
@@ -124,9 +121,8 @@
                         </AuthorizeView>
                     </div>
 
-                    @if (isEditing && currentUserIsAdminOrSupport) // Adiciona verificação de permissão aqui
+                    @if (isEditing && currentUserIsAdminOrSupport)
                     {
-                        <!-- MODO EDIÇÃO -->
                         <EditForm Model="editModel" OnValidSubmit="HandleUpdateTicket" FormName="EditTicketForm">
                             <DataAnnotationsValidator />
                             <ul class="list-group list-group-flush">
@@ -154,12 +150,10 @@
                                 <li class="list-group-item">
                                     <label class="form-label fw-bold small mb-1">Atendente</label>
                                     <InputSelect class="form-select form-select-sm" @bind-Value="editModel.IdAtendente">
-                                        <option value="">-- Não atribuído --</option> <!-- Usa string vazia para Nulo -->
+                                        <option value="">-- NÃ£o atribuÃ­do --</option>
                                         @foreach(var atendente in AtendentesLista) { <option value="@atendente.Id">@atendente.UserName</option> }
                                     </InputSelect>
-                                    <!-- Validação não necessária para campo anulável -->
                                 </li>
-                                <!-- Campos não editáveis -->
                                 <li class="list-group-item small"><strong>Aberto em:</strong> @chamado.DataAbertura.ToLocalTime().ToString("g")</li>
                                 <li class="list-group-item small"><strong>Solicitante:</strong> @chamado.Solicitante?.UserName</li>
                                 <li class="list-group-item small"><strong>Empresa:</strong> @chamado.Empresa?.NomeEmpresa</li>
@@ -176,7 +170,7 @@
                                      }
                                      else
                                      {
-                                         <span>Salvar Alterações</span>
+                                         <span>Salvar AlteraÃ§Ãµes</span>
                                      }
                                 </button>
                             </div>
@@ -184,7 +178,6 @@
                     }
                     else
                     {
-                        <!-- MODO VISUALIZAÇÃO -->
                          <ul class="list-group list-group-flush">
                             <li class="list-group-item"><strong>Status:</strong> @chamado.Status?.NomeStatus</li>
                             <li class="list-group-item">
@@ -198,15 +191,14 @@
                             <li class="list-group-item"><strong>Solicitante:</strong> @chamado.Solicitante?.UserName</li>
                             <li class="list-group-item"><strong>Empresa:</strong> @chamado.Empresa?.NomeEmpresa</li>
                             @if(chamado.Setor != null) { <li class="list-group-item"><strong>Setor:</strong> @chamado.Setor.NomeSetor</li> }
-                            <li class="list-group-item"><strong>Atendente:</strong> @(chamado.Atendente?.UserName ?? "Não atribuído")</li>
+                            <li class="list-group-item"><strong>Atendente:</strong> @(chamado.Atendente?.UserName ?? "Nï¿½o atribuï¿½do")</li>
                             @if(chamado.DataFechamento != null) { <li class="list-group-item"><strong>Fechado em:</strong> @chamado.DataFechamento.Value.ToLocalTime().ToString("g")</li> }
                         </ul>
                     }
 
-                    <!-- Botão Aceitar Chamado -->
                      <AuthorizeView Roles="Admin, SuporteTI">
                          <Authorized>
-                            @if(!isEditing && chamado?.Atendente == null) // Adicionado null check para chamado
+                            @if(!isEditing && chamado?.Atendente == null)
                             {
                                 <div class="card-footer text-center">
                                     <button class="btn btn-primary w-100" @onclick="AcceptTicketAsync" disabled="@isAcceptingTicket">
@@ -235,29 +227,24 @@
     [Parameter]
     public Guid TicketId { get; set; }
 
-    // Flags
     private bool isLoading = true;
     private bool isSubmittingComment = false;
     private bool isAcceptingTicket = false;
     private bool isEditing = false;
     private bool isSavingEdit = false;
 
-    // Dados
     private Chamado? chamado;
     private string? currentUserId;
     private bool currentUserIsAdminOrSupport = false;
 
-    // Listas Dropdown
     private List<StatusChamado> StatusLista = new();
     private List<Prioridade> PrioridadesLista = new();
     private List<Categoria> CategoriasLista = new();
     private List<ApplicationUser> AtendentesLista = new();
 
-    // IDs Status
     private Guid? statusEmAndamentoId;
     private Guid? statusFechadoId;
 
-    // ViewModels Forms
     private CommentInputModel novoComentario = new();
     private EditTicketInputModel editModel = new();
 
@@ -266,12 +253,12 @@
         isLoading = true;
         isEditing = false;
         novoComentario = new();
-        chamado = null; // Limpa para recarregar
+        chamado = null;
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true && currentUserId == null) // Pega userId apenas uma vez
+        if (user.Identity?.IsAuthenticated == true && currentUserId == null)
         {
              currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
              bool isAdmin = user.IsInRole("Admin");
@@ -279,33 +266,30 @@
              currentUserIsAdminOrSupport = isAdmin || isSuporteTI;
         }
 
-        if(!string.IsNullOrEmpty(currentUserId)) // Prossegue apenas se tiver user Id
+        if(!string.IsNullOrEmpty(currentUserId))
         {
             chamado = await DbContext.Chamados
                 .Include(c => c.Solicitante)
                 .Include(c => c.Empresa).Include(c => c.Setor)
                 .Include(c => c.Categoria).Include(c => c.Prioridade).Include(c => c.Status)
                 .Include(c => c.Atendente)
-                .Include(c => c.Historico.OrderByDescending(h=>h.DataComentario)) // Ordena aqui
+                .Include(c => c.Historico.OrderByDescending(h=>h.DataComentario))
                     .ThenInclude(h => h.Usuario)
                 .Include(c => c.Historico).ThenInclude(h => h.StatusAnterior)
                 .Include(c => c.Historico).ThenInclude(h => h.StatusNovo)
                 .FirstOrDefaultAsync(c => c.IdChamado == TicketId);
 
-            // Validação Permissão
             if (chamado != null && !currentUserIsAdminOrSupport && chamado.IdSolicitante != currentUserId && chamado.IdAtendente != currentUserId)
             {
                 chamado = null;
             }
 
-            // Carrega listas para dropdowns (apenas se precisar e ainda não carregou)
             if (chamado != null && currentUserIsAdminOrSupport && !StatusLista.Any())
             {
                 StatusLista = await DbContext.StatusChamados.OrderBy(s => s.NomeStatus).ToListAsync();
                 PrioridadesLista = await DbContext.Prioridades.OrderBy(p => p.NivelUrgencia).ToListAsync();
                 CategoriasLista = await DbContext.Categorias.Where(c=> c.Ativo).OrderBy(c => c.NomeCategoria).ToListAsync();
 
-                // Busca usuários Admin/Suporte
                 var adminRole = await DbContext.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Name == "Admin");
                 var suporteRole = await DbContext.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Name == "SuporteTI");
                 if(adminRole != null || suporteRole != null)
@@ -323,7 +307,6 @@
                         .ToListAsync();
                 }
 
-                // Busca IDs Status
                 statusEmAndamentoId = StatusLista.FirstOrDefault(s => s.NomeStatus == "Em Andamento")?.IdStatus;
                 statusFechadoId = StatusLista.FirstOrDefault(s => s.NomeStatus == "Fechado")?.IdStatus;
             }
@@ -344,20 +327,18 @@
             DataComentario = DateTime.UtcNow
         };
         DbContext.ChamadoHistorico.Add(historicoEntry);
-        await DbContext.SaveChangesAsync(); // Corrigido: Adicionado await
+        await DbContext.SaveChangesAsync();
 
-        // Recarrega os dados para mostrar o novo comentário (evita recarregar a página inteira)
-         if (chamado.Historico is List<ChamadoHistorico> historicoList) // Verifica se é lista para Add
+         if (chamado.Historico is List<ChamadoHistorico> historicoList)
         {
-            // Precisamos carregar o usuário do histórico recém-criado
             historicoEntry.Usuario = await DbContext.Users.FindAsync(currentUserId);
-            historicoList.Insert(0, historicoEntry); // Adiciona no início da lista (ordem desc)
+            historicoList.Insert(0, historicoEntry);
         } else {
-             await OnParametersSetAsync(); // Fallback: Recarrega tudo
+             await OnParametersSetAsync();
         }
-        novoComentario = new(); // Limpa form
+        novoComentario = new();
         isSubmittingComment = false;
-        StateHasChanged(); // Força atualização da UI
+        StateHasChanged();
     }
 
     private async Task AcceptTicketAsync()
@@ -375,8 +356,8 @@
         var historicoEntry = CreateHistoryEntry($"Chamado aceito pelo atendente.", statusAnteriorId, statusEmAndamentoId.Value);
         DbContext.ChamadoHistorico.Add(historicoEntry);
 
-        await DbContext.SaveChangesAsync(); // Corrigido: Adicionado await
-        await OnParametersSetAsync(); // Recarrega
+        await DbContext.SaveChangesAsync();
+        await OnParametersSetAsync();
         isAcceptingTicket = false;
     }
 
@@ -388,7 +369,7 @@
             IdStatus = chamado.IdStatus,
             IdPrioridade = chamado.IdPrioridade,
             IdCategoria = chamado.IdCategoria,
-            IdAtendente = chamado.IdAtendente ?? "" // Usa string vazia para nulo no InputSelect
+            IdAtendente = chamado.IdAtendente ?? ""
         };
         isEditing = true;
     }
@@ -403,45 +384,40 @@
         if (chamado == null || string.IsNullOrWhiteSpace(currentUserId) || !currentUserIsAdminOrSupport) return;
         isSavingEdit = true;
 
-        var ticketToUpdate = await DbContext.Chamados.FindAsync(chamado.IdChamado); // Usa o chamado original como referência
+        var ticketToUpdate = await DbContext.Chamados.FindAsync(chamado.IdChamado);
         if (ticketToUpdate == null) { isSavingEdit = false; return; }
 
         var historicosParaAdicionar = new List<ChamadoHistorico>();
         var now = DateTime.UtcNow;
-        bool hasChanges = false; // Flag para saber se algo mudou
+        bool hasChanges = false;
 
-        // Compara Status
         if (ticketToUpdate.IdStatus != editModel.IdStatus)
         {
             historicosParaAdicionar.Add(CreateHistoryEntry($"Status alterado.", ticketToUpdate.IdStatus, editModel.IdStatus));
             ticketToUpdate.IdStatus = editModel.IdStatus;
             hasChanges = true;
-            // Atualiza DataFechamento
             if(editModel.IdStatus == statusFechadoId) {
                 ticketToUpdate.DataFechamento = now;
             } else {
                  ticketToUpdate.DataFechamento = null;
             }
         }
-        // Compara Prioridade
         if (ticketToUpdate.IdPrioridade != editModel.IdPrioridade)
         {
-             historicosParaAdicionar.Add(CreateHistoryEntry($"Prioridade alterada.", null, null, editModel.IdPrioridade, null)); // Passa ID novo
+             historicosParaAdicionar.Add(CreateHistoryEntry($"Prioridade alterada.", null, null, editModel.IdPrioridade, null));
             ticketToUpdate.IdPrioridade = editModel.IdPrioridade;
             hasChanges = true;
         }
-        // Compara Categoria
         if (ticketToUpdate.IdCategoria != editModel.IdCategoria)
         {
-            historicosParaAdicionar.Add(CreateHistoryEntry($"Categoria alterada.", null, null, null, editModel.IdCategoria)); // Passa ID novo
+            historicosParaAdicionar.Add(CreateHistoryEntry($"Categoria alterada.", null, null, null, editModel.IdCategoria));
             ticketToUpdate.IdCategoria = editModel.IdCategoria;
             hasChanges = true;
         }
-        // Compara Atendente (string vazia == null)
         string? newAtendenteId = string.IsNullOrEmpty(editModel.IdAtendente) ? null : editModel.IdAtendente;
         if (ticketToUpdate.IdAtendente != newAtendenteId)
         {
-             historicosParaAdicionar.Add(CreateHistoryEntry($"Atendente alterado.", null, null, null, null, newAtendenteId)); // Passa ID novo
+             historicosParaAdicionar.Add(CreateHistoryEntry($"Atendente alterado.", null, null, null, null, newAtendenteId));
             ticketToUpdate.IdAtendente = newAtendenteId;
             hasChanges = true;
         }
@@ -453,14 +429,12 @@
 
         isEditing = false;
         isSavingEdit = false;
-        await OnParametersSetAsync(); // Recarrega
+        await OnParametersSetAsync();
     }
 
-    // Helper Refatorado
     private ChamadoHistorico CreateHistoryEntry(string comentarioBase, Guid? statusAnteriorId = null, Guid? statusNovoId = null, Guid? prioridadeNovaId = null, Guid? categoriaNovaId = null, string? atendenteNovoId = null)
     {
         string comentarioFinal = comentarioBase;
-        // Adiciona detalhes específicos da mudança
         if(statusNovoId.HasValue && statusAnteriorId.HasValue) {
             var statusAnt = StatusLista.FirstOrDefault(s => s.IdStatus == statusAnteriorId)?.NomeStatus ?? "N/A";
             var statusNov = StatusLista.FirstOrDefault(s => s.IdStatus == statusNovoId)?.NomeStatus ?? "N/A";
@@ -471,10 +445,10 @@
         } else if (categoriaNovaId.HasValue) {
             var cat = CategoriasLista.FirstOrDefault(c=>c.IdCategoria == categoriaNovaId)?.NomeCategoria ?? "N/A";
             comentarioFinal += $" Nova categoria: {cat}.";
-        } else if (atendenteNovoId != null) { // Verifica se foi passado um ID novo (não nulo/vazio)
+        } else if (atendenteNovoId != null) {
              var atendente = AtendentesLista.FirstOrDefault(a => a.Id == atendenteNovoId)?.UserName ?? "N/A";
              comentarioFinal += $" Novo atendente: {atendente}.";
-        } else if (editModel.IdAtendente == "") { // Verifica se editModel indica remoção (string vazia)
+        } else if (editModel.IdAtendente == "") {
             comentarioFinal += $" Atendente removido.";
         }
 
@@ -490,20 +464,18 @@
         };
     }
 
-    // Modelo Input Comentário
     public class CommentInputModel
     {
-        [Required(ErrorMessage = "O comentário não pode estar vazio.")]
-        [StringLength(2000, ErrorMessage = "O comentário é muito longo.")]
-        public string Comentario { get; set; } = string.Empty; // Corrigido aqui
+        [Required(ErrorMessage = "O comentÃ¡rio nÃ£o pode estar vazio.")]
+        [StringLength(2000, ErrorMessage = "O comentÃ¡rio Ã© muito longo.")]
+        public string Comentario { get; set; } = string.Empty;
     }
 
-    // Modelo Input Edição Ticket
     public class EditTicketInputModel
     {
         [Required] public Guid IdStatus { get; set; }
         [Required] public Guid IdPrioridade { get; set; }
         [Required] public Guid IdCategoria { get; set; }
-        public string? IdAtendente { get; set; } // String? para <InputSelect> e opção ""
+        public string? IdAtendente { get; set; }
     }
 }

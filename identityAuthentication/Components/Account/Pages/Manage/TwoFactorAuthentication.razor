@@ -21,21 +21,21 @@
         {
             <div class="alert alert-danger">
                 <strong>Você não tem mais códigos de recuperação.</strong>
-                <p>You must <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a> antes de poder fazer login com um código de recuperação.</p>
+                <p>Você deve <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a> antes de poder fazer login com um código de recuperação.</p>
             </div>
         }
         else if (recoveryCodesLeft == 1)
         {
             <div class="alert alert-danger">
                 <strong>Você tem 1 código de recuperação restante.</strong>
-                <p>You can <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a>.</p>
+                <p>Você pode <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a>.</p>
             </div>
         }
         else if (recoveryCodesLeft <= 3)
         {
             <div class="alert alert-warning">
                 <strong>Você tem @recoveryCodesLeft códigos de recuperação restantes</strong>
-                <p>Você deve <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a>.</p>
+                <p>Você tem <a href="Account/Manage/GenerateRecoveryCodes">gerar um novo conjunto de códigos de recuperação</a>.</p>
             </div>
         }
 

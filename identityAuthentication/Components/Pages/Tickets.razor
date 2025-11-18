@@ -24,7 +24,7 @@
     else if (!ChamadosLista.Any())
     {
         <p class="text-center text-muted mt-4">Nenhum ticket encontrado.</p>
-        @if (!isAdmin && !isSuporteTI) // Usuário comum sem tickets
+        @if (!isAdmin && !isSuporteTI)
         {
             <div class="text-center mt-3">
                 <a href="/novochamado" class="btn btn-primary">
@@ -40,25 +40,25 @@
                 <thead class="table-light">
                     <tr>
                         <th>#ID</th>
-                        <th>Título</th>
+                        <th>TÃ­tulo</th>
                         <th>Categoria</th>
                         <th>Prioridade</th>
                         <th>Status</th>
                         <th>Aberto Em</th>
-                        @if (isAdmin || isSuporteTI) // Admin e SuporteTI veem o solicitante
+                        @if (isAdmin || isSuporteTI)
                         {
                             <th>Solicitante</th>
                         }
-                        @if (isAdmin) // Só Admin vê a empresa e atendente na lista principal
+                        @if (isAdmin)
                         {
                             <th>Empresa</th>
                             <th>Atendente</th>
                         }
-                        @if (isSuporteTI && !isAdmin) // SuporteTI vê o atendente se não for admin
+                        @if (isSuporteTI && !isAdmin)
                         {
                              <th>Atendente</th>
                         }
-                        <th>Ações</th>
+                        <th>AÃ§Ãµes</th>
                     </tr>
                 </thead>
                 <tbody>

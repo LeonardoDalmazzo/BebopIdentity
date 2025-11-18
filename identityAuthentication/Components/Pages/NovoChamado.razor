@@ -26,7 +26,7 @@
     {
         <div class="alert alert-warning text-center" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i>
-            Você precisa estar vinculado a uma empresa para abrir um chamado.
+            VocÃª precisa estar vinculado a uma empresa para abrir um chamado.
             Por favor, entre em contato com o administrador do sistema.
         </div>
     }
@@ -63,13 +63,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Título</label>
+                    <label class="form-label fw-bold">TÃ­tulo</label>
                     <InputText class="form-control" @bind-Value="novoChamado.Titulo" />
                     <ValidationMessage For="() => novoChamado.Titulo" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Descrição do Problema/Solicitação</label>
+                    <label class="form-label fw-bold">DescriÃ£o do Problema/SolicitaÃ§Ã£o</label>
                     <InputTextArea class="form-control" rows="5" @bind-Value="novoChamado.Descricao" />
                     <ValidationMessage For="() => novoChamado.Descricao" />
                 </div>
@@ -140,7 +140,7 @@
     {
         if (currentUserId == null || currentUserEmpresaId == null || statusAbertoId == null)
         {
-            Console.WriteLine("Erro: Dados do usuário ou status 'Aberto' não encontrados.");
+            Console.WriteLine("Erro: Dados do usuï¿½rio ou status 'Aberto' nï¿½o encontrados.");
             return;
         }
 
@@ -174,11 +174,11 @@
         [Required(ErrorMessage = "Selecione uma prioridade.")]
         public Guid IdPrioridade { get; set; }
 
-        [Required(ErrorMessage = "O título é obrigatório.")]
-        [StringLength(200, ErrorMessage = "O título pode ter no máximo 200 caracteres.")]
+        [Required(ErrorMessage = "O tÃ­tulo Ã© obrigatÃ³rio.")]
+        [StringLength(200, ErrorMessage = "O tÃ­tulo pode ter no mÃ¡ximo 200 caracteres.")]
         public string Titulo { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A descrição é obrigatória.")]
+        [Required(ErrorMessage = "A descriÃ£oo Ã© obrigatÃ³ria.")]
         public string Descricao { get; set; } = string.Empty;
     }
 }
